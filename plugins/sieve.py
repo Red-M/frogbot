@@ -10,8 +10,8 @@ def sieve_suite(bot, input, func, kind, args):
         if input.trigger in bot.config.get('disabled_commands', []):
             return None
 
-        ignored = bot.config.get('ignored', [])
-        if input.host in ignored or input.nick in ignored:
+        ignored = bot.config["ignore"]
+        if input.host in ignored or input.nick in ignored or input.chan in ignored and not input.nick in bot.config["admins"]:
             return None
 
     fn = re.match(r'^plugins.(.+).py$', func._filename)

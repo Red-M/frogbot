@@ -5,39 +5,36 @@ from util import hook, http
 
 @hook.command('wa')
 @hook.command
-def wolframalpha(inp):
-    ".wa/.wolframalpha <query> -- scrapes Wolfram Alpha's" \
-            " results for <query>"
-    #return "derp"
-    url = "http://www.wolframalpha.com/input/?asynchronous=false"
+def wolframalpha(inp, bot=None):
+    ".wa <query> -- Computes <query> using Wolfram Alpha."
 
-    h = http.get_html(url, i=inp)
+    api_key = bot.config.get("api_keys", {}).get("wolframalpha", None)
+    if api_key is None:
+        return "error: no api key set"
 
-    pods = h.xpath("//div[@class='pod ']")
+    url = 'http://api.wolframalpha.com/v2/query?format=plaintext'
+
+    result = http.get_xml(url, input=inp, appid=api_key)
 
     pod_texts = []
-    for pod in pods:
-        heading = pod.find('h2')
-        if heading is not None:
-            heading = heading.text_content().strip()
-            if heading.startswith('Input'):
-                continue
-        else:
+    for pod in result.xpath("//pod"):
+        title = pod.attrib['title']
+        if pod.attrib['id'] == 'Input':
             continue
 
         results = []
-        for alt in pod.xpath('div/div[@class="output pnt"]/img/@alt'):
-            alt = alt.strip().replace('\\n', '; ')
-            alt = re.sub(r'\s+', ' ', alt)
-            if alt:
-                results.append(alt)
+        for subpod in pod.xpath('subpod/plaintext/text()'):
+            subpod = subpod.strip().replace('\\n', '; ')
+            subpod = re.sub(r'\s+', ' ', subpod)
+            if subpod:
+                results.append(subpod)
         if results:
-            pod_texts.append(heading + ' ' + '|'.join(results))
+            pod_texts.append(title + ': ' + '|'.join(results))
 
     ret = '. '.join(pod_texts)
 
     if not pod_texts:
-        return 'no results'
+        return 'No results.'
 
     ret = re.sub(r'\\(.)', r'\1', ret)
 
@@ -45,12 +42,12 @@ def wolframalpha(inp):
         return unichr(int(match.group(1), 16))
 
     ret = re.sub(r'\\:([0-9a-z]{4})', unicode_sub, ret)
-    leng = 175
-    if len(ret) > leng:
-        ret = ret[:ret.rfind(' ', 0, leng)]
+
+    if len(ret) > 430:
+        ret = ret[:ret.rfind(' ', 0, 430)]
         ret = re.sub(r'\W+$', '', ret) + '...'
 
     if not ret:
-        return 'no result'
+        return 'No results..'
 
     return ret

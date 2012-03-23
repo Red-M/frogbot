@@ -1,95 +1,46 @@
+# Plugin by Lukeroge 
+# <lukeroge@gmail.com> <https://github.com/lukeroge/CloudBot/>
+
 from util import hook, http
-import urllib
-import urllib2
-import httplib
-import time
-import urlparse
-import re
+from re import match
+from urllib2 import urlopen, Request, HTTPError
+from urllib import urlencode
 
-re_adfly = re.compile(r'var url = \'([^\']+)\'')
+class ShortenError(Exception):
+    def __init__(self, value):
+        self.value = value
 
+    def __str__(self):
+        return repr(self.value)
 
-@hook.command
-def isgd(inp):
-    ".isgd <url> -- shorten link using is.gd"
-
-    data = urllib.urlencode(dict(format="simple", url=inp))
-
+def bitly(url, user, apikey):
     try:
-        return urllib2.urlopen("http://is.gd/create.php", data).read()
-    except Exception as e:
-        return "Error: %s" % e
-
-    return shortened
-
+        if url[:8] == "https://":
+            pass
+        elif url[:7] != "http://":
+            url = "http://" + url
+        params = urlencode({'longUrl': url, 'login': user, 'apiKey': apikey, 'format': 'json'})
+        j = http.get_json("http://api.bit.ly/v3/shorten?%s" % params)
+        if j['status_code'] == 200:
+            return j['data']['url']
+        raise ShortenError('%s' % j['status_txt'])
+    except (HTTPError, ShortenError):
+        return "Could not shorten %s!" % url
 
 @hook.command
-def expand(inp):
-    ".expand <shorturl> -- expand link shortened url"
+def shorten(inp, bot = None):
+    ".shorten <url> - Makes an j.mp/bit.ly shortlink to the url provided."
+    api_user = bot.config.get("api_keys", {}).get("bitly_user", None)
+    api_key = bot.config.get("api_keys", {}).get("bitly_api", None)
+    if api_key is None:
+        return "error: no api key set"
+    return bitly(inp, api_user, api_key)
 
-    # try HEAD
-    parts = urlparse.urlsplit(inp)
-    conn = httplib.HTTPConnection(parts.hostname)
-    path = parts.path
-    if parts.query:
-        path += "?" + parts.query
-    conn.request('HEAD', path)
-    resp = conn.getresponse()
-    location = resp.msg.getheader("Location")
-
-    if not location:
-        return inp
-
-    expandedparts = urlparse.urlsplit(location)
-    quoted = expandedparts._replace(path=urllib.quote(expandedparts.path))
-    url = quoted.geturl()
-
+@hook.command
+def expand(inp, bot = None):
+    ".expand <url> - Gets the original URL from a shortened link."
+    try:
+        url = http.get_url(inp)
+    except HTTPError, e:
+        return "Failed to expand URL."
     return url
-
-
-def db_init(db):
-    db.execute("create table if not exists deadfly_cache (adfly primary key, url)")
-    db.commit()
-
-
-def db_get(db, adfly):
-    return db.execute("select url from deadfly_cache where adfly = ?", (adfly, )).fetchone()
-
-
-def db_add(db, adfly, url):
-    db.execute("insert into deadfly_cache (adfly, url) values (?,?)", (adfly, url))
-    db.commit()
-
-
-@hook.command
-def deadfly(inp, db=None):
-    ".deadfly <adf.ly url> -- scrapes link shortened by adf.ly"
-    db_init(db)
-
-    result = db_get(db, inp)
-
-    if result:
-        return result[0]
-
-    parts = urlparse.urlsplit(inp)
-
-    parts = parts._replace(netloc=parts.netloc + ".nyud.net")
-    url = urlparse.urlunsplit(parts)
-    timeout = 15
-
-    try:
-        text = urllib2.urlopen(url, timeout=timeout).read()
-    except Exception, e:
-        print e
-        url = inp
-        try:
-            text = urllib2.urlopen(url, timeout=timeout).read()
-        except Exception, e:
-            print e
-            return "Error"
-
-    result = re_adfly.search(text).group(1)
-
-    db_add(db, inp, result)
-
-    return result

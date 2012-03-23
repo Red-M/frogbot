@@ -1,4 +1,4 @@
-# plugin by Red_M
+# plugin by Red_M on irc.esper.net or Red-M on github.
 from util import hook
 import os
 import datetime
@@ -9,16 +9,30 @@ import time
 import re
 from itertools import izip
 
-repnick = "Red_M"#bot owner nick here
+
 
 @hook.command
-def adm(inp, bot=None, input=None):
+def admins(inp, bot=None, input=None):
 	outos=str(bot.config["admins"])
 	outos=outos.replace("u'","")
 	outos=outos.replace("'","")
 	outos=outos.replace("[","")
 	outos=outos.replace("]","")
 	input.conn.send("PRIVMSG "+ input.chan +" :The Admins of this bot are: "+outos)
+
+@hook.command
+def users(inp, bot=None, input=None):
+        outoss=(str(input.conn.users.users))
+        outoss=outoss.replace("u'","")
+        outoss=outoss.replace("'","")
+        #comp = re.compile('^<User object at 0x1.*>$')
+        #print str(comp) 
+        outoss=outoss.replace("<User object at 0x1","")
+        outoss=outoss.replace("{","")
+        outoss=outoss.replace("}","")
+        outoss=outoss.replace(": ","")
+
+        input.say(str(outoss))
 
 
 @hook.command
@@ -29,7 +43,14 @@ def chan(inp, input=None, db=None, bot=None, users=None):
         outrs=outrs.replace("[","")
         outrs=outrs.replace("]","")
         input.conn.send("PRIVMSG "+ input.chan +" :I am in these channels: "+outrs)
-       
+     
+@hook.command
+def raw(inp, input=None):
+       if (input.nick=="Red_M" and not len(inp)==0):
+               input.conn.send(inp)
+       else:
+               input.conn.send("PRIVMSG "+input.nick+" :You cannot do this.")
+  
 
 @hook.command
 def gtfo(inp, input=None):
@@ -39,45 +60,35 @@ def gtfo(inp, input=None):
                input.conn.send("PRIVMSG "+input.nick+" :You cannot do this.")
 
 
+@hook.event("KICK")
+def kickss(inp, input=None):
+    if input.nick in input.bot.config['admins']:
+        return"WHY! WHY! WHY HIM?!?!?!? OH GOD WHY!"
+    else:
+        return"oh god!"
 
-@hook.command
-def nasf(inp, input=None):
-	"checks to see if a single fuck was given."
-	if input.nick in input.bot.config["admins"]:
-		input.conn.send("PRIVMSG " + input.chan + " :" + input.nick + " numerous fucks found.")
-        else:
-            if input.nick not in input.bot.config["admins"]:
-                input.conn.send("PRIVMSG " + input.chan + " :" + input.nick + " error: not a single fuck was found.")
-        
+#@hook.event("NICK")
+def nickss(inp, input=None):
+    outrs=str(input.conn.channels)
+    outrs=outrs.replace("u'","")
+    outrs=outrs.replace("'","")
+    outrs=outrs.replace("[","")
+    outrs=outrs.replace("]","")
+    if input.nick in input.bot.config['admins'] and not input.nick=="Red_M":
+        input.conn.send("PRIVMSG "+outrs+" :"+input.nick+" has decide to change their nick to "+input.chan+".")
+    if input.nick=="Red_M":
+        input.conn.send("PRIVMSG "+outrs+" :Master where did you go?")
+    else:
+        input.conn.send("PRIVMSG "+outrs+" :"+input.nick+" has decide to change their nick to "+input.chan+".")
 
-@hook.command
-def kl(inp, say=None, nick=None, input=None):
-    "kills me."
-    if not input.nick==repnick:
-        input.notice("Only bot admins can use this command!")
-    elif input.nick==repnick:
-        input.conn.send('QUIT :Kill switch activated by Red_M.')
-        time.sleep(3)
-        os.abort()
-
-@hook.command
-def rl(inp, say=None, input=None):
-    "restarts me."
-    if input.nick not in input.bot.config["admins"]:
-         input.notice("Only bot admins can use this command!")
-    elif input.nick in input.bot.config["admins"]:
-       input.conn.send('QUIT :Restart switch activated by '+input.nick+'.')
-       os.system("screen python2.6 ./bot.py")
-       time.sleep(3)
-       os.abort()
 
 @hook.command
 def ac(inp, input=None):
     "asks crow something."
     if not inp == "":
         input.conn.send("PRIVMSG crow :?" + inp + " > " + input.nick)
-    if not input.nick==repnick:
-        input.conn.send("PRIVMSG "+repnick+" :"+input.nick+" has asked crow ?" + inp + " > " + input.nick)
+    if not input.nick=="Red_M":
+        input.conn.send("PRIVMSG Red_M :"+input.nick+" has asked crow ?" + inp + " > " + input.nick)
     if inp == "":
         input.say("nothing has been asked. not sending.") 
 
@@ -86,8 +97,8 @@ def aw(inp, input=None):
     "asks wololo something."
     if not inp == "":
         input.conn.send("PRIVMSG wololo :?" + inp + " > " + input.nick)
-    if not input.nick==repnick:
-        input.conn.send("PRIVMSG "+repnick+" :"+input.nick+" has asked wololo ?" + inp + " > " + input.nick)
+    if not input.nick=="Red_M":
+        input.conn.send("PRIVMSG Red_M :"+input.nick+" has asked wololo ?" + inp + " > " + input.nick)
     if inp == "":
         input.say("nothing has been asked. not sending.") 
 
@@ -98,12 +109,12 @@ def ab(inp, input=None):
         botn = inp.split(" ")
         botn = botn[0]
         input.conn.send("PRIVMSG "+botn+" :?" + inp + " > " + input.nick)  
-    if not input.nick==repnick:     
-        input.conn.send("PRIVMSG "+repnick+" :"+input.nick+" has asked "+botn+" ?" + inp + " > " + input.nick)
+    if not input.nick=="Red_M":     
+        input.conn.send("PRIVMSG Red_M :"+input.nick+" has asked "+botn+" ?" + inp + " > " + input.nick)
     if inp == "":
         input.say("nothing has been asked. not sending.")   
 			
-					
+						
 @hook.command
 def up(inp, input=None):
 	if input.nick==repnick:

@@ -300,14 +300,14 @@ def question(inp, chan='', say=None, db=None, input=None, nick="", me=None, bot=
                 def cmdme(o):
                     outputlines.append("<action>" + o)
 
-                newinput = bot.Input(input.conn, input.raw, input.prefix, input.command, input.params,
+                newinput = (input.conn, input.raw, input.prefix, input.command, input.params,
                     setternick, "user", "host", input.paraml, input.msg)
-                newinput.say = cmdsay
-                newinput.reply = cmdsay
-                newinput.me = cmdme
-                newinput.inp = varreplace(filterinp, variables)
-                newinput.trigger = trigger
-                bot.dispatch(newinput, "command", cmdfunc, cmdargs, autohelp=True)
+                #newinput.say = cmdsay
+                #newinput.reply = cmdsay
+                #newinput.me = cmdme
+                #newinput.inp = varreplace(filterinp, variables)
+                #newinput.trigger = trigger
+                input.say(newinput, "command", cmdfunc, cmdargs, autohelp=False)
                 time.sleep(3.5)  # WRONG.. but meh
                 outputlines = [filters([line, setternick], variables, filterhistory) for line in outputlines]
                 return outputlines
@@ -400,8 +400,20 @@ def question(inp, chan='', say=None, db=None, input=None, nick="", me=None, bot=
         local = get_memory(db, chan, word)
         default = get_memory(db, defaultchan, word)
         if local:
-            output("[local] " + local)
+              ignored = bot.config["ignore"]
+              if input.host in ignored or input.nick in ignored or input.chan in ignored and not input.nick in bot.config["admins"]:
+                   return None
+              else:
+                   output("[local] " + local)
         if default:
-            output("[global] " + default)
+              ignored = bot.config["ignore"]
+              if input.host in ignored or input.nick in ignored or input.chan in ignored and not input.nick in bot.config["admins"]:
+                   return None
+              else:
+                   output("[global] " + default)
     else:
-        output(filters(retrieve(word, chan), variables, filterhistory))
+         ignored = bot.config["ignore"]
+         if input.host in ignored or input.nick in ignored or input.chan in ignored and not input.nick in bot.config["admins"]:
+              return None
+         else:
+              output(filters(retrieve(word, chan), variables, filterhistory))
