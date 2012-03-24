@@ -15,14 +15,24 @@ if not os.path.exists('config'):
             "local irc":
             {
               "server": "localhost",
-              "nick": "skybot",
+              "nick": "frog",
               "channels": ["#test"]
             }
           },
           "disabled_plugins": [],
           "disabled_commands": [],
           "acls": {},
-          "api_keys": {},
+          "api_keys": 
+          {
+            "geoip": "INSERT API KEY FROM ipinfodb.com HERE",
+            "tvdb": "INSERT API KEY FROM thetvdb.com HERE",
+            "bitly_user": "INSERT USERNAME FROM bitly.com HERE",
+            "bitly_api": "INSERT API KEY FROM bitly.com HERE",
+            "wolframalpha": "INSERT API KEY FROM wolframalpha.com HERE",
+            "lastfm": "INSERT API KEY FROM lastfm HERE",
+            "mc_user": "INSERT MINECRAFT USERNAME HERE",
+            "mc_pass": "INSERT MINECRAFT PASSWORD HERE"
+          },
           "censored_strings":
           [
             "DCC SEND",
@@ -34,7 +44,11 @@ if not os.path.exists('config'):
             "\\x01",
             "!coz",
             "!tell /x"
-          ]
+          ],
+          "admins": ["Red_M"],
+          "superadmins": ["Red_M"],
+          "owner": ["Red_M"],
+          "ignore": []
         }''') + '\n')
 
 

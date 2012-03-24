@@ -24,6 +24,8 @@ body = ['head',
 @hook.command
 def kill(inp, me = None, nick = None, input=None, notice=None):
     ".kill <user> - kill a user"
+    if input.nick in bot.config["admins"] or input.nick in bot.config["superadmins"] or input.nick in bot.config["owner"]:
+        return"I am not killing one of my admins!"
     inp = inp.strip()
 
     if not re.match("^[A-Za-z0-9_|.-\]\[]*$", inp.lower()):

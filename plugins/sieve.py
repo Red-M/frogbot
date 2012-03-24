@@ -10,8 +10,10 @@ def sieve_suite(bot, input, func, kind, args):
         if input.trigger in bot.config.get('disabled_commands', []):
             return None
 
+        if type == "event":
+            return input
         ignored = bot.config["ignore"]
-        if input.host in ignored or input.nick in ignored or input.chan in ignored and not input.nick in bot.config["admins"]:
+        if input.host in ignored or input.nick in ignored or input.chan in ignored and not (input.nick in bot.config["admins"] or input.nick in bot.config["superadmins"] or input.nick in bot.config["owner"]):
             return None
 
     fn = re.match(r'^plugins.(.+).py$', func._filename)
@@ -32,8 +34,15 @@ def sieve_suite(bot, input, func, kind, args):
 
     if args.get('adminonly', False):
         admins = bot.config.get('admins', [])
-
         if input.host not in admins and input.nick not in admins:
+            return None
+    if args.get('sadminonly', False):
+        sadmins=bot.config['superadmins']
+        if input.host not in sadmins and input.nick not in sadmins:
+            return None
+    if args.get('owneronly', False):
+        owner=bot.config['owner']
+        if input.host not in owner and input.nick not in owner:
             return None
 
     return input
