@@ -23,7 +23,7 @@ character_replacements = {
     's': 'š',
     't': 'ţ',
     'u': 'ü',
-    'v': 'v',
+    'v': '',
     'w': 'ω',
     'x': 'χ',
     'y': 'ÿ',
@@ -57,7 +57,7 @@ character_replacements = {
 
 @hook.event("PRIVMSG")
 def watch(inp, munge_count=0, command=None, input=None, bot=None, users=None):
-	ignorenick = input.bot.config["owner"]
+	ignorenick = "Red_M" #nick to ignore within the quotes
 	repchan = "#frog" #the channel to report back to
 	cmdpre = "," #your cmd prefix
 	reps = 0

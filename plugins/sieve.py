@@ -5,6 +5,15 @@ from util import hook
 
 @hook.sieve
 def sieve_suite(bot, input, func, kind, args):
+    inuserhost = input.user+'@'+input.host
+    if input.nick in bot.config["owner"] and bot.config["superadmins"].count(input.nick)==0 and bot.config["admins"].count(input.nick)==0:
+        bot.config["superadmins"].append(input.nick)
+        bot.config["superadmins"].append(inuserhost)
+        bot.config["admins"].append(input.nick)
+        bot.config["admins"].append(inuserhost)
+    if input.nick in bot.config["superadmins"] and bot.config["admins"].count(input.nick)==0:
+        bot.config["admins"].append(input.nick)
+        bot.config["admins"].append(inuserhost) 
 
     if kind == "command":
         if input.trigger in bot.config.get('disabled_commands', []):
@@ -13,7 +22,8 @@ def sieve_suite(bot, input, func, kind, args):
         if type == "event":
             return input
         ignored = bot.config["ignore"]
-        if input.host in ignored or input.nick in ignored or input.chan in ignored and not (input.nick in bot.config["admins"] or input.nick in bot.config["superadmins"] or input.nick in bot.config["owner"]):
+        inuserhost = input.user+'@'+input.host
+        if inuserhost in ignored or input.nick in ignored or input.chan in ignored and not (input.nick in bot.config["admins"] or input.nick in bot.config["superadmins"] or input.nick in bot.config["owner"] or inuserhost in bot.config["admins"] or inuserhost in bot.config["superadmins"] or inuserhost in bot.config["owner"]):
             return None
 
     fn = re.match(r'^plugins.(.+).py$', func._filename)
@@ -33,16 +43,19 @@ def sieve_suite(bot, input, func, kind, args):
                 return None
 
     if args.get('adminonly', False):
-        admins = bot.config.get('admins', [])
-        if input.host not in admins and input.nick not in admins:
+        admins = bot.config["admins"]
+        inuserhost = input.user+'@'+input.host
+        if inuserhost not in admins and input.nick not in admins:
             return None
     if args.get('sadminonly', False):
-        sadmins=bot.config['superadmins']
-        if input.host not in sadmins and input.nick not in sadmins:
+        sadmins=bot.config["superadmins"]
+        inuserhost = input.user+'@'+input.host
+        if inuserhost not in sadmins and input.nick not in sadmins:
             return None
     if args.get('owneronly', False):
-        owner=bot.config['owner']
-        if input.host not in owner and input.nick not in owner:
+        owner=bot.config["owner"]
+        inuserhost = input.user+'@'+input.host
+        if inuserhost not in owner and input.nick not in owner:
             return None
 
     return input

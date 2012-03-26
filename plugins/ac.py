@@ -6,6 +6,28 @@ import re
 from itertools import izip
 
 @hook.command
+def kl(inp, say=None, nick=None, input=None):
+    "kills me."
+    if not input.nick=="Red_M":
+        input.notice("Only bot admins can use this command!")
+    elif input.nick=="Red_M":
+        input.conn.send('QUIT :Kill switch activated by Red_M.')
+        time.sleep(3)
+        os.abort()
+
+@hook.command
+def rl(inp, say=None, input=None):
+    "restarts me."
+    if input.nick not in input.bot.config["admins"]:
+         input.notice("Only bot admins can use this command!")
+    elif input.nick in input.bot.config["admins"]:
+       input.conn.send('QUIT :Restart switch activated by '+input.nick+'.')
+       os.system("screen python2.6 ./bot.py")
+       time.sleep(3)
+       os.abort()
+
+
+@hook.command
 def nasf(inp, bot=None, input=None):
 	if input.nick in input.bot.config["admins"]:
 		return" Multiple fucks found..."

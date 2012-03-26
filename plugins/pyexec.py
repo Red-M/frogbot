@@ -40,7 +40,7 @@ def rexec(s, bot, input, db):
 @hook.command
 def ply(inp, bot=None, input=None, nick=None, db=None, chan=None):
     "execute local python - only admins can use this"
-    if not usertracking.query(db, bot.config, nick, chan, "ply") or not input.nick=="Red_M":
+    if not usertracking.query(db, bot.config, nick, chan, "ply") or not input.nick in bot.config["superadmins"]:
         return "nope.avi"
     try:
 	
