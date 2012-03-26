@@ -4,11 +4,13 @@ import usertracking
 import sys
 import time
 import re
+import json
 
 @hook.command
 def aad(inp, bot=None, input=None):
 	if input.nick in input.bot.config["superadmins"] and bot.config["admins"].count(inp)==0:
 		bot.config["admins"].append(inp)
+		json.dump(bot.config, open('config', 'w'), sort_keys=True, indent=2)
 		return"Done."
 	else:
 		return"already an admin..."
@@ -17,6 +19,7 @@ def aad(inp, bot=None, input=None):
 def asa(inp, bot=None, input=None):
 	if input.nick in input.bot.config["owner"] and bot.config["superadmins"].count(inp)==0:
 		bot.config["superadmins"].append(inp)
+		json.dump(bot.config, open('config', 'w'), sort_keys=True, indent=2)
 		return"Done."
 	else:
 		return"already a super admin..."
@@ -48,11 +51,13 @@ def ignore(inp, bot=None, input=None):
 	if input.nick in input.bot.config["admins"]:
 		if bot.config["ignore"]=='':
 			bot.config["ignore"].append(inp)
+			json.dump(bot.config, open('config', 'w'), sort_keys=True, indent=2)
 			
 		else:
 			if bot.config["ignore"].count(inp)==0:
 				bot.config["ignore"].append(inp)
 				bot.config["ignore"].sort()
+				json.dump(bot.config, open('config', 'w'), sort_keys=True, indent=2)
 				return"done."
 			else:
 				return"already ignored..."
@@ -72,6 +77,7 @@ def listen(inp, bot=None, input=None):
 		return"no nick was added to listen to...ignoring command..."
 	if input.nick in input.bot.config["admins"]:
 		bot.config["ignore"].remove(inp)
+		json.dump(bot.config, open('config', 'w'), sort_keys=True, indent=2)
 		return"done."
 	else:
 		return"Nope.avi"
