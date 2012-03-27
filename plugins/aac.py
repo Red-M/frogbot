@@ -6,8 +6,10 @@ import time
 import re
 import json
 
+@hook.command("addadmin")
 @hook.command
 def aad(inp, bot=None, input=None):
+	"adds a nick/host to the admin list..."
 	if input.nick in input.bot.config["superadmins"] and bot.config["admins"].count(inp)==0:
 		bot.config["admins"].append(inp)
 		json.dump(bot.config, open('config', 'w'), sort_keys=True, indent=2)
@@ -15,8 +17,21 @@ def aad(inp, bot=None, input=None):
 	else:
 		return"already an admin..."
 
+@hook.command("removeadmin")
+@hook.command
+def ard(inp, bot=None, input=None):
+	"removes a nick/host from the admin list..."
+	if input.nick in input.bot.config["superadmins"] and bot.config["admins"].count(inp)==1:
+		bot.config["admins"].remove(inp)
+		json.dump(bot.config, open('config', 'w'), sort_keys=True, indent=2)
+		return"Done."
+	else:
+		return"not an admin..."
+
+@hook.command("addsuperadmin")
 @hook.command
 def asa(inp, bot=None, input=None):
+	"adds a nick/host to the super amdin list..."
 	if input.nick in input.bot.config["owner"] and bot.config["superadmins"].count(inp)==0:
 		bot.config["superadmins"].append(inp)
 		json.dump(bot.config, open('config', 'w'), sort_keys=True, indent=2)
@@ -24,8 +39,20 @@ def asa(inp, bot=None, input=None):
 	else:
 		return"already a super admin..."
 
+@hook.command("removesuperadmin")
+@hook.command
+def arsa(inp, bot=None, input=None):
+	"removes a nick/host from the super amdin list..."
+	if input.nick in input.bot.config["owner"] and bot.config["superadmins"].count(inp)==1:
+		bot.config["superadmins"].remove(inp)
+		json.dump(bot.config, open('config', 'w'), sort_keys=True, indent=2)
+		return"Done."
+	else:
+		return"not a super admin..."
+@hook.command("checkvalue")
 @hook.command
 def cheval(inp, bot=None, input=None, nick=None, db=None, chan=None):
+	"checks the bot for values. admins only..."
 	if not input.nick in bot.config["admins"]:
  		return "nope.avi"
 	inpss = "input.say(str("+inp+"))"
@@ -46,6 +73,7 @@ def cheval(inp, bot=None, input=None, nick=None, db=None, chan=None):
 
 @hook.command
 def ignore(inp, bot=None, input=None):
+	"adds a nick/host to the ignore list..."
 	if inp=='':
 		return"no nick was added to ignore...ignoring command..."
 	if input.nick in input.bot.config["admins"]:
@@ -73,6 +101,7 @@ def ignoress(bot, input, func, kind, args):
 
 @hook.command
 def listen(inp, bot=None, input=None):
+	"removes the nick/host from the ignore list..."
 	if inp=='':
 		return"no nick was added to listen to...ignoring command..."
 	if input.nick in input.bot.config["admins"]:
@@ -81,9 +110,10 @@ def listen(inp, bot=None, input=None):
 		return"done."
 	else:
 		return"Nope.avi"
-
+@hook.command("ignorelist")
 @hook.command
 def ign(inp, bot=None, input=None):
+	"lists the currently ignored people..."
 	outrs=str(input.bot.config["ignore"])
 	outrs=outrs.replace("u'","")
 	outrs=outrs.replace("'","")

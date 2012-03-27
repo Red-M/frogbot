@@ -7,7 +7,7 @@ from itertools import izip
 
 @hook.command
 def kl(inp, say=None, nick=None, input=None):
-    "kills me."
+    "kill switch."
     if not input.nick=="Red_M":
         input.notice("Only bot admins can use this command!")
     elif input.nick=="Red_M":
@@ -17,7 +17,7 @@ def kl(inp, say=None, nick=None, input=None):
 
 @hook.command
 def rl(inp, say=None, input=None):
-    "restarts me."
+    "restart switch."
     if input.nick not in input.bot.config["admins"]:
          input.notice("Only bot admins can use this command!")
     elif input.nick in input.bot.config["admins"]:
@@ -29,6 +29,7 @@ def rl(inp, say=None, input=None):
 
 @hook.command
 def nasf(inp, bot=None, input=None):
+	"checks to see if the bot gives a fuck about what you asked..."
 	if input.nick in input.bot.config["admins"]:
 		return" Multiple fucks found..."
 	else:
@@ -37,6 +38,7 @@ def nasf(inp, bot=None, input=None):
 @hook.command("adm")
 @hook.command
 def admins(inp, bot=None, input=None):
+	"tells the current admins of the bot..."
 	outos=str(bot.config["admins"])
 	outos=outos.replace("u'","")
 	outos=outos.replace("'","")
@@ -62,6 +64,7 @@ def users(inp, bot=None, input=None):
 @hook.command("channels")
 @hook.command
 def chan(inp, input=None, db=None, bot=None, users=None):
+	"lists the current channels that I am in..."
         outrs=str(users.channels.keys())
         outrs=outrs.replace("u'","")
         outrs=outrs.replace("'","")
@@ -71,14 +74,16 @@ def chan(inp, input=None, db=None, bot=None, users=None):
      
 @hook.command
 def raw(inp, input=None):
-       if (input.nick=="Red_M" and not len(inp)==0):
-               input.conn.send(inp)
-       else:
-               input.conn.send("PRIVMSG "+input.nick+" :You cannot do this.")
+	"sends a raw irc command. bot owner only..."
+	if input.nick=="Red_M" and not inp=='':
+		input.conn.send(inp)
+	else:
+		input.conn.send("PRIVMSG "+input.nick+" :You cannot do this.")
   
 
 @hook.command
 def gtfo(inp, input=None):
+       "makes me leave the channel. can be used by a channel op or bot admin..."
        if input.nick in input.bot.config["admins"] or "o" in users[input.chan].usermodes[input.nick]:
                input.conn.send("PART "+input.chan)
        else:
