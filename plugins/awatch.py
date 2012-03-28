@@ -63,8 +63,6 @@ def watch(inp, munge_count=0, command=None, input=None, bot=None, users=None):
 	reps = 0
 	rep = ""
 	nickf = input.nick
-	print len(nickf)
-	print nickf
 	for n in xrange(len(nickf)):
 		rep = character_replacements.get(nickf[n])
 		if rep:

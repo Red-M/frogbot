@@ -2,7 +2,6 @@ import re
 
 from util import hook
 
-
 @hook.sieve
 def sieve_suite(bot, input, func, kind, args):
     inuserhost = input.user+'@'+input.host
@@ -11,7 +10,7 @@ def sieve_suite(bot, input, func, kind, args):
         bot.config["superadmins"].append(inuserhost)
         bot.config["admins"].append(input.nick)
         bot.config["admins"].append(inuserhost)
-    if input.nick in bot.config["superadmins"] and bot.config["admins"].count(input.nick)==0:
+    if (input.nick in input.bot.config["superadmins"] or inuserhost in input.bot.config["superadmins"]) and bot.config["admins"].count(input.nick)==0:
         bot.config["admins"].append(input.nick)
         bot.config["admins"].append(inuserhost) 
 

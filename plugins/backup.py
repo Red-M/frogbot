@@ -41,4 +41,4 @@ def up(inp, input=None):
 			testss = True 
 	if not input.nick==repnick:
 		input.conn.send("PRIVMSG "+input.nick+" Nope.avi")
-        input.conn.send("PRIVMSG "+repnick+" :"+input.nick+" tried to use the auto backup command.")
+        input.conn.send("PRIVMSG "+bot.config["owner"]+" :"+input.nick+" tried to use the auto backup command.")

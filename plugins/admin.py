@@ -5,7 +5,8 @@ from util import hook
 
 # Added to make the move to a new auth system a lot easier
 def isadmin(input):
-    if input.nick in input.bot.config["admins"]:
+    inuserhost = input.user+'@'+input.host
+    if input.nick in bot.config["admins"] or input.nick in bot.config["superadmins"] or input.nick in bot.config["owner"] or inuserhost in bot.config["admins"] or inuserhost in bot.config["superadmins"] or inuserhost in bot.config["owner"]:
         return True
     else:
         return False
@@ -41,8 +42,8 @@ def part(inp, input=None, notice=None):
 @hook.command
 def nick(inp, input=None, notice=None):
     ".nick <nick> -- change the bots nickname to <nick>"
-    if not isadmin(input):
-        notice("Only bot admins can use this command!")
+    if not input.nick in bot.config["owner"]:
+        notice("Only the bot owner can use this command!")
         return
     notice("Changing nick to " + inp + ".")
     input.conn.send("NICK " + inp)

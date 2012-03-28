@@ -24,7 +24,7 @@ body = ['head',
 @hook.command
 def kill(inp, me = None, nick = None, input=None, notice=None):
     ".kill <user> - kill a user"
-    if input.nick in bot.config["admins"] or input.nick in bot.config["superadmins"] or input.nick in bot.config["owner"]:
+    if input.nick in input.bot.config["admins"] or inuserhost in input.bot.config["admins"]:
         return"I am not killing one of my admins!"
     inp = inp.strip()
 
