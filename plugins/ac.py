@@ -102,13 +102,24 @@ def kickss(inp, input=None):
     else:
         input.say("oh god!")
 		
-@hook.event("QUIT")
-def quitss(inp, input=None):
+@hook.event("PART")
+def quitss(inp, input=None, bot=None):
     inuserhost = input.user+'@'+input.host
     if input.nick in input.bot.config['admins'] or inuserhost in bot.config["admins"]:
-        input.say("*as Gir* Master, where did you go? I can't see you!")
+        input.conn.send("PRIVMSG  : *as Gir* Master, where did you go? I can't see you!")
     else:
-        input.say("Bye!")
+        return"Bye!"
+
+@hook.event("JOIN")
+def joinss(inp, input=None, bot=None):
+    inuserhost = input.user+'@'+input.host
+    if input.nick in input.bot.config['admins'] or inuserhost in bot.config["admins"]:
+        return"*as Gir* ooh Hi Master!"
+    else:
+        if input.nick==input.conn.nick:
+            input.say("")
+        else:
+            return"hi there..."
 
 
 @hook.command
