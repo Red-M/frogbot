@@ -127,7 +127,7 @@ irc_param_ref = re.compile(r'(?:^|(?<= ))(:.*|[^ ]+)').findall
 class IRC(object):
     "handles the IRC protocol"
     #see the docs/ folder for more information on the protocol
-    def __init__(self, server, nick, port=7777, channels=[], conf={}):
+    def __init__(self, server, nick, port=6667, channels=[], conf={}):
         self.channels = channels
         self.conf = conf
         self.server = server
@@ -150,7 +150,7 @@ class IRC(object):
         self.set_pass(self.conf.get('server_password'))
         self.set_nick(self.nick)
         self.cmd("USER",
-            [conf.get('user', 'Red_M_'), "3", "*", conf.get('realname',
+            [conf.get('user', 'frog'), "3", "*", conf.get('realname',
                 'Red_Dragon')])
 
     def parse_loop(self):
@@ -203,7 +203,7 @@ class IRC(object):
 
 
 class FakeIRC(IRC):
-    def __init__(self, server, nick, port=7777, channels=[], conf={}, fn=""):
+    def __init__(self, server, nick, port=6667, channels=[], conf={}, fn=""):
         self.channels = channels
         self.conf = conf
         self.server = server

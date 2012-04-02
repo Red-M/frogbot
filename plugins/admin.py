@@ -39,7 +39,7 @@ def part(inp, input=None, notice=None):
 @hook.command
 def nick(inp, input=None, notice=None):
     ".nick <nick> -- change the bots nickname to <nick>"
-    if not input.nick in input.bot.config["owner"]:
+    if not perm.isowner(input):
         notice("Only the bot owner can use this command!")
         return
     notice("Changing nick to " + inp + ".")

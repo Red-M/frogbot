@@ -18,3 +18,15 @@ def isowner(input):
 		return True
 	else:
 		return False
+def isbot(input):
+	inuserhost = input.user+'@'+input.host
+	if input.nick in input.bot.config["bots"] or inuserhost in input.bot.config["bots"]:
+		return True
+	else:
+		return False
+def isignored(input):
+	inuserhost = input.user+'@'+input.host
+	if input.nick in input.bot.config["ignore"] or inuserhost in input.bot.config["ignore"] or input.chan in input.bot.config["ignore"]:
+		return True
+	else:
+		return False

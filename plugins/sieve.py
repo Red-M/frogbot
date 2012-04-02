@@ -7,29 +7,29 @@ from util import perm
 def sieve_suite(bot, input, func, kind, args):
     inuserhost = input.user+'@'+input.host
     ignored = bot.config["ignore"]
-    if input.nick in bot.config["owner"] and bot.config["superadmins"].count(input.nick)==0 and bot.config["admins"].count(input.nick)==0:
+    if perm.isowner(input) and bot.config["superadmins"].count(input.nick)==0 and bot.config["admins"].count(input.nick)==0:
         bot.config["superadmins"].append(input.nick)
         bot.config["admins"].append(input.nick)
-    if inuserhost in bot.config["owner"] and bot.config["superadmins"].count(inuserhost)==0 and bot.config["admins"].count(inuserhost)==0:
+    if perm.isowner(input) and bot.config["superadmins"].count(inuserhost)==0 and bot.config["admins"].count(inuserhost)==0:
         bot.config["superadmins"].append(inuserhost)
         bot.config["admins"].append(inuserhost)
-    if input.nick in input.bot.config["superadmins"] and bot.config["admins"].count(input.nick)==0:
+    if perm.issuperadmin(input) and bot.config["admins"].count(input.nick)==0:
         bot.config["admins"].append(input.nick)
-    if inuserhost in input.bot.config["superadmins"] and bot.config["admins"].count(inuserhost)==0:
+    if perm.issuperadmin(input) and bot.config["admins"].count(inuserhost)==0:
         bot.config["admins"].append(inuserhost) 
 
     if kind == "command":
         if input.trigger in bot.config.get('disabled_commands', []):
             return None
 
-        if type == "event" and inuserhost not in ignored or input.nick not in ignored or input.chan not in ignored:
+        if type == "event" and not(perm.isignored(input)):
             return input
         else:
             return None
 
-    if inuserhost in ignored or input.nick in ignored or input.chan in ignored and not (input.nick in bot.config["admins"] or input.nick in bot.config["superadmins"] or input.nick in bot.config["owner"] or inuserhost in bot.config["admins"] or inuserhost in bot.config["superadmins"] or inuserhost in bot.config["owner"]):
+    if perm.isignored(input) or perm.isbot(input) and not (perm.isadmin(input)):
         return None
-    if type == "event" and inuserhost in ignored or input.nick in ignored or input.chan in ignored and not (input.nick in bot.config["admins"] or input.nick in bot.config["superadmins"] or input.nick in bot.config["owner"] or inuserhost in bot.config["admins"] or inuserhost in bot.config["superadmins"] or inuserhost in bot.config["owner"]):
+    if type == "event" and perm.isignored(input) and not (perm.isadmin(input)):
         return None
 
     fn = re.match(r'^plugins.(.+).py$', func._filename)
@@ -49,19 +49,13 @@ def sieve_suite(bot, input, func, kind, args):
                 return None
 
     if args.get('adminonly', False):
-        admins = bot.config["admins"]
-        inuserhost = input.user+'@'+input.host
-        if inuserhost not in admins and input.nick not in admins:
+        if perm.isadmin(input):
             return None
-    if args.get('sadminonly', False):
-        sadmins=bot.config["superadmins"]
-        inuserhost = input.user+'@'+input.host
-        if inuserhost not in sadmins and input.nick not in sadmins:
+    if args.get('superadminonly', False):
+        if perm.issuperadmin(input):
             return None
     if args.get('owneronly', False):
-        owner=bot.config["owner"]
-        inuserhost = input.user+'@'+input.host
-        if inuserhost not in owner and input.nick not in owner:
+        if perm.isowner(input):
             return None
 
     return input

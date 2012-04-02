@@ -20,7 +20,7 @@ class Input(dict):
             if chan == nick:  # PMs don't need prefixes
                 conn.msg(chan, msg)
             else:
-                conn.msg(chan, nick + ': ' + msg)
+                conn.msg(chan, msg)
 
         def pm(msg):
             conn.msg(nick, msg)
@@ -29,7 +29,7 @@ class Input(dict):
             conn.set_nick(nick)
 
         def me(msg):
-            conn.msg(chan, "\x01%s %s\x01" % ("ACTION", msg))
+            conn.msg(chan, "\x01%s \x034,1 %s\x01" % ("ACTION", msg))
 
         def notice(msg):
             conn.cmd('NOTICE', [nick, msg])

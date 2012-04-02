@@ -46,6 +46,9 @@ if not os.path.exists('config'):
             "!tell /x"
           ],
           "admins": ["Red_M"],
+          "superadmins": ["Red_M"],
+          "owner": "Red_M",
+		  "bots": [],
           "ignore": []
         }''') + '\n')
 

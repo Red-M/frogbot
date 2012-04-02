@@ -101,7 +101,7 @@ def ignore(inp, bot=None, input=None):
 @hook.sieve
 def ignoress(bot, input, func, kind, args):
 	inuserhost = input.user+'@'+input.host
-	if input.nick in bot.config["ignore"] or inuserhost in bot.config["ignore"]:
+	if perm.isignored(input):
 		return
 	else:
 		return input
