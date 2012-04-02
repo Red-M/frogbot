@@ -8,38 +8,35 @@ from util import perm
 
 @hook.command
 def up(inp, input=None):
+	"Nothing to see here. Move along."
 	if perm.isowner(input):
-        repnick=input.nick
+		repnick=input.nick
 		testss = True
-		while testss:            
-			print "1"
+		while testss:
 			testss = False
-			print "2"
-			filedir = './dir to backup to' # directory to backup to on the ftp
-			bu = './persist/'+input.bot.config["connections"]["local irc"]["nick"]+'.db' # only change this if you know what this is.
-			ftp_host = 'host name' #ftp hostname or url
-			ftp_user = 'username' #ftp username
-			ftp_pw = 'password' #ftp pass
-			ftp_port = 25563 # port of the ftp
+			filedir = '/shares/mc/bot'
+			bu = './persist/frog.db'
+			ftp_host = 'redmun.dyndns.org'
+			ftp_user = 'admin'
+			ftp_pw = 'danb17'
+			ftp_port = 25563
 			now = datetime.datetime.now()
 			day = now.strftime("%Y%m%d_%H")
 			ftp = ftplib.FTP()
 			ftp.connect(ftp_host,ftp_port)
-			ftp.login(ftp_user, ftp_pw)
-			ftp.cwd(filedir)
+			ftp.login("admin", "danb17")
+			ftp.cwd("./mc/bot")
 			file_bu = open(bu ,'rb')
 			ftp.storbinary('STOR backup'+ day +'.db' , file_bu)
 			file_bu.close()
 			ftp.quit()
-			input.conn.send("PRIVMSG "+repnick+" done.")
-			input.conn.send("PRIVMSG "+repnick+" :waiting for "+str(3)+" hours before backing up again!")
+			input.conn.send("PRIVMSG Red_M done.")
+			input.conn.send("PRIVMSG Red_M :waiting for "+str(3)+" hours before backing up again!")
 			time.sleep(2)
-			print "3"
 			time.sleep(3600*3)
-			input.conn.send("PRIVMSG "+repnick+" :waiting done.")
-			input.conn.send("PRIVMSG "+repnick+" :doing another backup.")
-			print "4"
+			input.conn.send("PRIVMSG Red_M :waiting done.")
+			input.conn.send("PRIVMSG Red_M :doing another backup.")
 			testss = True 
 	if not perm.isowner(input):
 		input.conn.send("PRIVMSG "+input.nick+" Nope.avi")
-        input.conn.send("PRIVMSG "+bot.config["owner"]+" :"+input.nick+" tried to use the auto backup command.")
+        input.conn.send("PRIVMSG Red_M :"+input.nick+" tried to use the auto backup command.")
