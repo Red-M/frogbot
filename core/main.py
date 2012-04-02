@@ -2,7 +2,7 @@ import thread
 import traceback
 
 
-thread.stack_size(256 * 256)  # reduce vm size
+thread.stack_size(256* 256)  # reduce vm size
 
 
 class Input(dict):

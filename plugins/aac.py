@@ -28,6 +28,30 @@ def ard(inp, bot=None, input=None):
 		return"Done."
 	else:
 		input.say("not an admin...")
+		
+
+@hook.command("addbot")
+@hook.command
+def aab(inp, bot=None, input=None):
+	"adds a nick/host to the bots list..."
+	if perm.isadmin(input) and bot.config["bots"].count(inp)==0:
+		bot.config["bots"].append(inp)
+		json.dump(bot.config, open('config', 'w'), sort_keys=True, indent=2)
+		return"Done."
+	else:
+		return"already on bot list..."
+
+@hook.command("removebot")
+@hook.command
+def arb(inp, bot=None, input=None):
+	"removes a nick/host from the bots list..."
+	if perm.isadmin(input) and bot.config["bots"].count(inp)>=1:
+		bot.config["bots"].remove(inp)
+		json.dump(bot.config, open('config', 'w'), sort_keys=True, indent=2)
+		return"Done."
+	else:
+		input.say("not a bot...")
+
 
 @hook.command("addsuperadmin")
 @hook.command
@@ -66,8 +90,11 @@ def cheval(inp, bot=None, input=None, nick=None, db=None, chan=None):
 		_blah = dict(globals())
 		_blah.update(input)
 		_blah.update(locals())
-		exec inpss in _blah
-        	return _blah["_r"] if "_r" in _blah else None
+		exec(inpss, _blah)
+		if "_r" in _blah:
+			return _blah["_r"]  
+		else:
+			None
 	except:
 		import traceback
 		s = traceback.format_exc()
@@ -121,6 +148,22 @@ def listen(inp, bot=None, input=None):
 	else:
 		return"Nope.avi"
 
+@hook.command("botlist")
+@hook.command
+def bol(inp, bot=None, input=None):
+	"lists the currently ignored bots on the bot list..."
+	outrs=', '.join(input.bot.config["bots"])
+	if outrs=='':
+		input.say("I am currently ignoring not one single bot!")
+	else:
+		if inp=='':
+			input.say("I am currently ignoring these bots \x034,1"+outrs+".")
+		else: 
+			if input.bot.config["bot"].count(inp)==1:
+				input.say("I am ignoring this bot...")
+			else:
+				input.say("I do not have that bot on my bot list...")
+		
 @hook.command("pokerface")
 @hook.command("ignorelist")
 @hook.command

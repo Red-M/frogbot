@@ -49,6 +49,7 @@ if not os.path.exists('config'):
           "superadmins": ["Red_M"],
           "owner": ["Red_M"],
           "reportchan": "#frog",
+		  "restartcmd": "",
 		  "bots": [],
           "ignore": []
         }''') + '\n')

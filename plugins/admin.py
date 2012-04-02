@@ -6,7 +6,7 @@ from util import hook
 from util import perm
 
 # Added to make the move to a new auth system a lot easier
-# Improved to account for frog's permissions system and moved the improvement to perm.py
+# Improved to account for frog's permissions system and moved the improvement to plugins/util/perm.py
 
 @hook.command
 def join(inp, input=None, db=None, notice=None):
@@ -140,3 +140,68 @@ def topic(inp, input=None, notice=None):
         else:
             out = "PRIVMSG "+input.nick+" :Cant set topic. Not enough arguements in command." 
     input.conn.send(out)
+	
+@hook.command(adminonly=True)
+def ban(inp, conn=None, chan=None, notice=None):
+    ".ban [channel] <user> -- Makes the bot ban <user> in [channel]. "\
+    "If [channel] is blank the bot will ban <user> in "\
+    "the channel the command was used in."
+    inp = inp.split(" ")
+    if inp[0][0] == "#":
+        chan = inp[0]
+        user = inp[1]
+        out = "MODE %s +b %s" % (chan, user)
+    else:
+        user = inp[0]
+        out = "MODE %s +b %s" % (chan, user)
+    notice("Attempting to ban %s from %s..." % (user, chan))
+    conn.send(out)
+
+
+@hook.command(adminonly=True)
+def unban(inp, conn=None, chan=None, notice=None):
+    ".unban [channel] <user> -- Makes the bot unban <user> in [channel]. "\
+    "If [channel] is blank the bot will unban <user> in "\
+    "the channel the command was used in."
+    inp = inp.split(" ")
+    if inp[0][0] == "#":
+        chan = inp[0]
+        user = inp[1]
+        out = "MODE %s -b %s" % (chan, user)
+    else:
+        user = inp[0]
+        out = "MODE %s -b %s" % (chan, user)
+    notice("Attempting to unban %s from %s..." % (user, chan))
+    conn.send(out)
+
+@hook.command(adminonly=True)
+def kickban(inp, chan=None, conn=None, notice=None):
+    ".kickban [channel] <user> [reason] -- Makes the bot kickban <user> in [channel] "\
+    "If [channel] is blank the bot will kickban the <user> in "\
+    "the channel the command was used in."
+    inp = inp.split(" ")
+    if inp[0][0] == "#":
+        chan = inp[0]
+        user = inp[1]
+        out1 = "MODE %s +b %s" % (chan, user)
+        out2 = "KICK %s %s" % (chan, user)
+        if len(inp) > 2:
+            reason = ""
+            for x in inp[2:]:
+                reason = reason + x + " "
+            reason = reason[:-1]
+            out = out + " :" + reason
+    else:
+        user = inp[0]
+        out1 = "MODE %s +b %s" % (chan, user)
+        out2 = "KICK %s %s" % (chan, user)
+        if len(inp) > 1:
+            reason = ""
+            for x in inp[1:]:
+                reason = reason + x + " "
+            reason = reason[:-1]
+            out = out + " :" + reason
+
+    notice("Attempting to kickban %s from %s..." % (user, chan))
+    conn.send(out1)
+    conn.send(out2)

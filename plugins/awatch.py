@@ -90,7 +90,7 @@ def watch(inp, munge_count=0, command=None, input=None, bot=None, users=None):
 			input.conn.send("PRIVMSG "+repchan+" :"+nickf+" (used/try to use) ,"+input.inp[1]+" in "+input.chan)
 		if input.chan==repchan and not input.nick==ignorenick and input.inp[1] in cmduse:
 			input.conn.send("PRIVMSG "+ignorenick+" :"+input.nick+" (used/try to use) ,"+input.inp[1]+" in "+repchan)
-	elif input.inp[1].startswith("?") or input.inp[1].startswith("!") or (input.command=="PRIVMSG" and input.inp[1] in cmduse):
+	elif (input.inp[1].startswith("?") and not input.inp[1]=="?") or (input.inp[1].startswith("!") and not input.inp[1]=="!") or (input.command=="PRIVMSG" and input.inp[1] in cmduse):
 		if input.chan==input.nick and not input.nick==ignorenick:
 			input.conn.send("PRIVMSG "+repchan+" :"+nickf+" asked me "+input.inp[1]+" in a private message.")
 		else:

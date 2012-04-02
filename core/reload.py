@@ -110,7 +110,7 @@ def reload(init=False):
                         bot.plugs[type] += [data]
 
                         if not init:
-                            print '### new plugin (type: %s) loaded:' % \
+                            print '# new plugin (type: %s) loaded:' % \
                                     type, format_plug(data)
 
     if changed:
@@ -118,11 +118,11 @@ def reload(init=False):
         for plug in bot.plugs['command']:
             name = plug[1]['name'].lower()
             if not re.match(r'^\w+$', name):
-                print '### ERROR: invalid command name "%s" (%s)' % (name,
+                print '# ERROR: invalid command name "%s" (%s)' % (name,
                   format_plug(plug))
                 continue
             if name in bot.commands:
-                print "### ERROR: command '%s' already registered (%s, %s)" % \
+                print "# ERROR: command '%s' already registered (%s, %s)" % \
                     (name, format_plug(bot.commands[name]),
                      format_plug(plug))
                 continue

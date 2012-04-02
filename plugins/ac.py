@@ -18,7 +18,7 @@ def kl(inp, say=None, nick=None, input=None):
         sys.exit()
 
 @hook.command
-def rl(inp, say=None, input=None):
+def rl(inp, say=None, input=None, bot=None):
     "restart switch."
     if not perm.isadmin(input):
         input.notice("Only bot admins can use this command!")
@@ -29,7 +29,7 @@ def rl(inp, say=None, input=None):
             time.sleep(3)
             sys.exit()
         elif os.name == 'nt':
-            os.system("start bot.py")
+            os.system(bot.config["restartcmd"])
             time.sleep(3)
             sys.exit()
 
