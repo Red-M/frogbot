@@ -17,6 +17,7 @@ class Bot(object):
 
 
 bot = Bot()
+bot.start_time = time.time()
 
 print 'Loading plugins'
 

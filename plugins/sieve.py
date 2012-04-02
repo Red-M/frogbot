@@ -19,18 +19,15 @@ def sieve_suite(bot, input, func, kind, args):
         bot.config["admins"].append(inuserhost) 
 
     if kind == "command":
-        if input.trigger in bot.config.get('disabled_commands', []):
+        if input.trigger in bot.config["disabled_commands"]:
             return None
 
-        if type == "event" and not(perm.isignored(input)):
-            return input
-        else:
+    if perm.isignored(input) or perm.isbot(input):
+        if not perm.isadmin(input):
             return None
-
-    if perm.isignored(input) or perm.isbot(input) and not (perm.isadmin(input)):
-        return None
-    if type == "event" and perm.isignored(input) and not (perm.isadmin(input)):
-        return None
+    if type == "event" and perm.isignored(input):
+        if not perm.isadmin(input):
+            return None
 
     fn = re.match(r'^plugins.(.+).py$', func._filename)
     disabled = bot.config.get('disabled_plugins', [])

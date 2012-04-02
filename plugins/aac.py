@@ -101,9 +101,9 @@ def ignore(inp, bot=None, input=None):
 @hook.sieve
 def ignoress(bot, input, func, kind, args):
 	inuserhost = input.user+'@'+input.host
-	if perm.isignored(input):
+	if perm.isignored(input) or perm.isbot(input):
 		return
-	else:
+	elif not (perm.isignored(input) or perm.isbot(input)):
 		return input
 
 @hook.command("kthx")
