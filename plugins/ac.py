@@ -80,7 +80,7 @@ def gtfo(inp, input=None):
 @hook.event("KICK")
 def kickss(inp, input=None):
     if perm.isadmin(input):
-        returninput.nick+": WHY! WHY! WHY HIM?!?!?!? OH GOD WHY!"
+        return input.nick+": WHY! WHY! WHY HIM?!?!?!? OH GOD WHY!"
     else:
         input.say("oh god!")
 

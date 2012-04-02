@@ -110,7 +110,7 @@ def act(inp, input=None, notice=None):
         for x in split[1:]:
             message = message + x + " "
         message = message[:-1]
-        out = "PRIVMSG %s :\x01ACTION \x034,1 %s\x01" % (split[0], message)
+        out = "PRIVMSG %s :\x01ACTION \x01\x034,1 %s\x01" % (split[0], message)
     else:
         message = ""
         for x in split[0:]:

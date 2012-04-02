@@ -60,4 +60,4 @@ def onjoin(paraml, conn=None, bot=None):
 @hook.regex(r'^\x01VERSION\x01$')
 def version(inp, notice=None):
     rev = get_version()
-    notice('Red_Ms modded version of crow. ##crow #cobalt #cobaltdev #medsouz #risucraft #frog #Redserv')
+    notice("Red_M's modded version of crow and cloudbot. custom dev! ##crow #cobalt #cobaltdev #medsouz #risucraft #frog #Redserv")
