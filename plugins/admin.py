@@ -1,20 +1,17 @@
 #  Shitty plugin made by iloveportalz0r
 #  Broken by The Noodle
 #  Improved by Lukeroge
+#  edited for frog by Red-M on github or Red_M on esper.net
 from util import hook
+from util import perm
 
 # Added to make the move to a new auth system a lot easier
-def isadmin(input):
-    inuserhost = input.user+'@'+input.host
-    if input.nick in bot.config["admins"] or input.nick in bot.config["superadmins"] or input.nick in bot.config["owner"] or inuserhost in bot.config["admins"] or inuserhost in bot.config["superadmins"] or inuserhost in bot.config["owner"]:
-        return True
-    else:
-        return False
+# Improved to account for frog's permissions system and moved the improvement to perm.py
 
 @hook.command
 def join(inp, input=None, db=None, notice=None):
     ".join <channel> -- joins a channel"
-    if not isadmin(input):
+    if not perm.isadmin(input):
         notice("Only bot admins can use this command!")
         return
     notice("Attempting to join " + inp + "...")
@@ -23,7 +20,7 @@ def join(inp, input=None, db=None, notice=None):
 @hook.command
 def cycle(inp, input=None, db=None, notice=None):
     ".cycle <channel> -- cycles a channel"
-    if not isadmin(input):
+    if not perm.isadmin(input):
         notice("Only bot admins can use this command!")
         return
     notice("Attempting to cycle " + inp + "...")
@@ -33,7 +30,7 @@ def cycle(inp, input=None, db=None, notice=None):
 @hook.command
 def part(inp, input=None, notice=None):
     ".part <channel> -- leaves a channel"
-    if not isadmin(input):
+    if not perm.isadmin(input):
         notice("Only bot admins can use this command!")
         return
     notice("Attempting to part from " + inp + "...")
@@ -42,7 +39,7 @@ def part(inp, input=None, notice=None):
 @hook.command
 def nick(inp, input=None, notice=None):
     ".nick <nick> -- change the bots nickname to <nick>"
-    if not input.nick in bot.config["owner"]:
+    if not input.nick in input.bot.config["owner"]:
         notice("Only the bot owner can use this command!")
         return
     notice("Changing nick to " + inp + ".")
@@ -51,7 +48,7 @@ def nick(inp, input=None, notice=None):
 @hook.command
 def kick(inp, input=None, notice=None):
     ".kick [channel] <user> [reason] -- kick a user!"
-    if not isadmin(input):
+    if not perm.isadmin(input):
         notice("Only bot admins can use this command!")
         return
     split = inp.split(" ")
@@ -82,7 +79,7 @@ def kick(inp, input=None, notice=None):
 @hook.command
 def say(inp, input=None, notice=None):
     ".say [channel] <message> -- makes the bot say <message> in [channel]. if [channel] is blank the bot will say the <message> in the channel the command was used in."
-    if not isadmin(input):
+    if not perm.isadmin(input):
         notice("Only bot admins can use this command!")
         return
     split = inp.split(" ")
@@ -104,7 +101,7 @@ def say(inp, input=None, notice=None):
 @hook.command
 def act(inp, input=None, notice=None):
     ".act [channel] <action> -- makes the bot act <action> in [channel]. if [channel] is blank the bot will act the <action> in the channel the command was used in."
-    if not isadmin(input):
+    if not perm.isadmin(input):
         notice("Only bot admins can use this command!")
         return
     split = inp.split(" ")
@@ -113,19 +110,19 @@ def act(inp, input=None, notice=None):
         for x in split[1:]:
             message = message + x + " "
         message = message[:-1]
-        out = "PRIVMSG %s :\x01ACTION %s\x01" % (split[0], message)
+        out = "PRIVMSG %s :\x01ACTION \x034,1 %s\x01" % (split[0], message)
     else:
         message = ""
         for x in split[0:]:
             message = message + x + " "
         message = message[:-1]
-        out = "PRIVMSG %s :\x01ACTION %s\x01" % (input.chan, message)
+        out = "PRIVMSG %s :\x01ACTION \x034,1 %s\x01" % (input.chan, message)
     input.conn.send(out)
 
 @hook.command
 def topic(inp, input=None, notice=None):
     ".topic [channel] <topic> -- change the topic of a channel"
-    if not isadmin(input):
+    if not perm.isadmin(input):
         notice("Only bot admins can use this command!")
         return
     split = inp.split(" ")

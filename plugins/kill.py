@@ -13,19 +13,24 @@ kills = ["rips off <who>'s <body> and leaves them to die.",
         "puts <who> into a sack, throws the sack in the river, and hurls the river into space.",
         "goes bowling with <who>'s head.",
         "sends <who> to /dev/null!",
-        "feeds <who> coke and mentos till they pop!"]
+        "feeds <who> coke and mentos till they pop!",
+        "rips apart the atomic bonds that hold <who> together.",
+        "removes <body> from <who> and leaves <who> to bleed out.",
+        "picks up <who> and throws <who> into the sun."]
 
 body = ['head',
         'arms',
         'leg',
         'arm',
-        '"special parts"']
+        '"special parts"',
+        'atomic bonds']
 
 @hook.command
 def kill(inp, me = None, nick = None, input=None, notice=None):
     ".kill <user> - kill a user"
-    if input.nick in input.bot.config["admins"] or inuserhost in input.bot.config["admins"]:
-        return"I am not killing one of my admins!"
+    inuserhost = input.user+'@'+input.host
+    if inp in input.bot.config["admins"]: 
+        input.say("I am not killing one of my admins!")
     inp = inp.strip()
 
     if not re.match("^[A-Za-z0-9_|.-\]\[]*$", inp.lower()):

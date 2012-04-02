@@ -49,6 +49,7 @@ def checkinp(chan, inp, localpm):
 @hook.command
 def no(inp, nick='', chan='', db=None, notice=None, bot=None, modes=None, input=None):
     ".no <word> is <data> -- remaps word to data"
+    inuserhost = input.user+'@'+input.host
     if modes.check("remember.no.no", db):
         return
     local, chan, inp = checkinp(chan, inp, True)
@@ -61,7 +62,7 @@ def no(inp, nick='', chan='', db=None, notice=None, bot=None, modes=None, input=
     if tail.startswith("is "):
         tail = " ".join(tail.split(" ")[1:])
 
-    if tail.startswith("<locked") and not modes.check("remember.lock", db) and (input.nick not in input.bot.config["admins"] or inuserhost not in input.bot.config["admins"]):
+    if tail.startswith("<locked") and not modes.check("remember.lock", db) and ((input.nick not in input.bot.config["admins"] and inuserhost not in input.bot.config["admins"])):
         notice(("[local]" if local else "") + "you may not lock factoids.")
         return
 
@@ -70,7 +71,7 @@ def no(inp, nick='', chan='', db=None, notice=None, bot=None, modes=None, input=
     if not data:
         notice("but '%s' doesn't exist!" % head.replace("'", "`"))
         return
-    if data and data.startswith("<locked") and not modes.check("remember.lock", db) and (input.nick not in input.bot.config["admins"] or inuserhost not in input.bot.config["admins"]):
+    if data and data.startswith("<locked") and not modes.check("remember.lock", db) and ((input.nick not in input.bot.config["admins"] and inuserhost not in input.bot.config["admins"])):
         notice(("[local]" if local else "") + "that factoid is locked, sorry.")
         return
 
@@ -87,6 +88,7 @@ def no(inp, nick='', chan='', db=None, notice=None, bot=None, modes=None, input=
 #@hook.regex("([^ ]*)")
 def remember(inp, nick='', chan='', db=None, input=None, notice=None, bot=None):
     ".remember [.] <word> is <data> -- maps word to data in the memory, '.' means here only"
+    inuserhost = input.user+'@'+input.host
     if input.modes.check("remember.no.remember", db):
         return
     db_init(db)
@@ -100,13 +102,13 @@ def remember(inp, nick='', chan='', db=None, input=None, notice=None, bot=None):
     if tail.startswith("is "):
         tail = " ".join(tail.split(" ")[1:])
 
-    if tail.startswith("<locked") and not input.modes.check("remember.lock", db) and (input.nick not in input.bot.config["admins"] or inuserhost not in input.bot.config["admins"]):
+    if tail.startswith("<locked") and not input.modes.check("remember.lock", db) and ((input.nick not in input.bot.config["admins"] and inuserhost not in input.bot.config["admins"])):
         notice(("[local]" if local else "") + "you may not lock factoids.")
         return
 
     data = get_memory(db, chan, head)
 
-    if data and data.startswith("<locked") and not input.modes.check("remember.lock", db) and (input.nick not in input.bot.config["admins"] or inuserhost not in input.bot.config["admins"]):
+    if data and data.startswith("<locked") and not input.modes.check("remember.lock", db) and ((input.nick not in input.bot.config["admins"] and inuserhost not in input.bot.config["admins"])):
         input.notice(("[local]" if local else "") + "that factoid is locked.")
         return
     if data and not data.startswith("<forgotten>"):
@@ -125,13 +127,14 @@ def remember(inp, nick='', chan='', db=None, input=None, notice=None, bot=None):
 @hook.command
 def forget(inp, chan='', db=None, nick='', notice=None, modes=None, input=None):
     ".forget [.] <word> -- forgets the mapping that word had, '.' means here only"
+    inuserhost = input.user+'@'+input.host
     if modes.check("remember.no.forget", db):
         return
     local, chan, inp = checkinp(chan, inp, True)
     db_init(db)
 
     data = get_memory(db, chan, inp)
-    if data and data.startswith("<locked") and not modes.check("remember.lock", db) and (input.nick not in input.bot.config["admins"] or inuserhost not in input.bot.config["admins"]):
+    if data and data.startswith("<locked") and not modes.check("remember.lock", db) and ((input.nick not in input.bot.config["admins"] and inuserhost not in input.bot.config["admins"])):
         notice(("[local]" if local else "") + "that factoid is locked.")
         return
     if data and not data.startswith("<forgotten>"):
@@ -151,6 +154,7 @@ def forget(inp, chan='', db=None, nick='', notice=None, modes=None, input=None):
 @hook.command
 def unforget(inp, chan='', db=None, nick='', notice=None, modes=None, input=None):
     ".unforget [.] <word> -- re-remembers the mapping the word had before, '.' means here only "
+    inuserhost = input.user+'@'+input.host
     if modes.check("remember.no.unforget", db):
         return
     db_init(db)
@@ -158,7 +162,7 @@ def unforget(inp, chan='', db=None, nick='', notice=None, modes=None, input=None
     local, chan, inp = checkinp(chan, inp, True)
 
     data = get_memory(db, chan, inp)
-    if data and data.startswith("<locked") and not modes.check("remember.lock", db) and (input.nick not in input.bot.config["admins"] or inuserhost not in input.bot.config["admins"]):
+    if data and data.startswith("<locked") and not modes.check("remember.lock", db) and ((input.nick not in input.bot.config["admins"] and inuserhost not in input.bot.config["admins"])):
         input.notice(("[local]" if local else "") + "that factoid is locked.")
         return
 
@@ -177,7 +181,7 @@ def unforget(inp, chan='', db=None, nick='', notice=None, modes=None, input=None
 @hook.command
 def mem(inp, chan='', db=None, nick='', notice=None, user='', host='', bot=None, modes=None, input=None):
     "controls memory."
-
+    inuserhost = input.user+'@'+input.host
     def lock(name):
         db_init(db)
         local = name.startswith("l:")
@@ -222,7 +226,7 @@ def mem(inp, chan='', db=None, nick='', notice=None, user='', host='', bot=None,
     if len(split):
         if not split[0] in commands:
             return "no such command"
-        if not modes.check("remember." + commands[split[0]][2], db) and (input.nick not in input.bot.config["admins"] or inuserhost not in input.bot.config["admins"]):
+        if not modes.check("remember." + commands[split[0]][2], db) and ((input.nick not in input.bot.config["admins"] and inuserhost not in input.bot.config["admins"])):
             return "you do not have permission to use that command"
         if len(split) == commands[split[0]][0] + 1:
             func = commands[split[0]][1]
@@ -236,6 +240,7 @@ def mem(inp, chan='', db=None, nick='', notice=None, user='', host='', bot=None,
 @hook.regex(r'^[?!](.+)')  # groups: (mode,word,args,redirectmode,redirectto)
 def question(inp, chan='', say=None, db=None, input=None, nick="", me=None, bot=None, notice=None):
     "!factoid -- shows what data is associated with word"
+    inuserhost = input.user+'@'+input.host
     filterhistory = []  # loop detection, maximum recursion depth(s)
     if input.modes.check("remember.no.question", db):
         return
@@ -354,7 +359,7 @@ def question(inp, chan='', say=None, db=None, input=None, nick="", me=None, bot=
     def finaloutput(s, redir, redirto, input, special=None):
         if not s:
             return
-        if redirto.startswith("#") and (input.nick not in input.bot.config["admins"] or inuserhost not in input.bot.config["admins"]):
+        if redirto.startswith("#") and ((input.nick not in input.bot.config["admins"] and inuserhost not in input.bot.config["admins"])):
             redirto = nick
             s = "I am not sending factoids into channels. I am not that stupid and only bot admins can do this."
         if redir == ">" and not special:
@@ -401,19 +406,19 @@ def question(inp, chan='', say=None, db=None, input=None, nick="", me=None, bot=
         default = get_memory(db, defaultchan, word)
         if local:
               ignored = bot.config["ignore"]
-              if input.host in ignored or input.nick in ignored or input.chan in ignored and (input.nick not in input.bot.config["admins"] or inuserhost not in input.bot.config["admins"]):
+              if input.host in ignored or input.nick in ignored or input.chan in ignored and ((input.nick not in input.bot.config["admins"] and inuserhost not in input.bot.config["admins"])):
                    return None
               else:
                    output("[local] " + local)
         if default:
               ignored = bot.config["ignore"]
-              if input.host in ignored or input.nick in ignored or input.chan in ignored and (input.nick not in input.bot.config["admins"] or inuserhost not in input.bot.config["admins"]):
+              if input.host in ignored or input.nick in ignored or input.chan in ignored and ((input.nick not in input.bot.config["admins"] and inuserhost not in input.bot.config["admins"])):
                    return None
               else:
                    output("[global] " + default)
     else:
          ignored = bot.config["ignore"]
-         if input.host in ignored or input.nick in ignored or input.chan in ignored and (input.nick not in input.bot.config["admins"] or inuserhost not in input.bot.config["admins"]):
+         if input.host in ignored or input.nick in ignored or input.chan in ignored and ((input.nick not in input.bot.config["admins"] and inuserhost not in input.bot.config["admins"])):
               return None
          else:
               output(filters(retrieve(word, chan), variables, filterhistory))

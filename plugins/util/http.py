@@ -87,3 +87,8 @@ def to_utf8(s):
 
 def quote_plus(s):
     return _quote_plus(to_utf8(s))
+
+def unescape(s):
+    if not s.strip():
+        return s
+    return html.fromstring(s).text_content()

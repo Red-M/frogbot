@@ -5,13 +5,13 @@ import sys
 import time
 import re
 import json
+from util import perm
 
 @hook.command("addadmin")
 @hook.command
 def aad(inp, bot=None, input=None):
 	"adds a nick/host to the admin list..."
-	inuserhost = input.user+'@'+input.host
-	if (input.nick in input.bot.config["superadmins"] or inuserhost in input.bot.config["superadmins"]) and bot.config["admins"].count(inp)==0:
+	if perm.issuperadmin(input) and bot.config["admins"].count(inp)==0:
 		bot.config["admins"].append(inp)
 		json.dump(bot.config, open('config', 'w'), sort_keys=True, indent=2)
 		return"Done."
@@ -22,20 +22,18 @@ def aad(inp, bot=None, input=None):
 @hook.command
 def ard(inp, bot=None, input=None):
 	"removes a nick/host from the admin list..."
-	inuserhost = input.user+'@'+input.host
-	if (input.nick in input.bot.config["superadmins"] or inuserhost in input.bot.config["superadmins"]) and bot.config["admins"].count(inp)==1:
+	if perm.issuperadmin(input) and bot.config["admins"].count(inp)>=1:
 		bot.config["admins"].remove(inp)
 		json.dump(bot.config, open('config', 'w'), sort_keys=True, indent=2)
 		return"Done."
 	else:
-		return"not an admin..."
+		input.say("not an admin...")
 
 @hook.command("addsuperadmin")
 @hook.command
 def asa(inp, bot=None, input=None):
 	"adds a nick/host to the super amdin list..."
-	inuserhost = input.user+'@'+input.host
-	if (input.nick in input.bot.config["owner"] or inuserhost in input.bot.config["owner"]) and bot.config["superadmins"].count(inp)==0:
+	if perm.isowner(input) and bot.config["superadmins"].count(inp)==0:
 		bot.config["superadmins"].append(inp)
 		json.dump(bot.config, open('config', 'w'), sort_keys=True, indent=2)
 		return"Done."
@@ -46,8 +44,7 @@ def asa(inp, bot=None, input=None):
 @hook.command
 def arsa(inp, bot=None, input=None):
 	"removes a nick/host from the super amdin list..."
-	inuserhost = input.user+'@'+input.host
-	if (input.nick in input.bot.config["owner"] or inuserhost in input.bot.config["owner"]) and bot.config["superadmins"].count(inp)==1:
+	if perm.isowner(input) and bot.config["superadmins"].count(inp)==1:
 		bot.config["superadmins"].remove(inp)
 		json.dump(bot.config, open('config', 'w'), sort_keys=True, indent=2)
 		return"Done."
@@ -58,9 +55,11 @@ def arsa(inp, bot=None, input=None):
 @hook.command
 def cheval(inp, bot=None, input=None, nick=None, db=None, chan=None):
 	"checks the bot for values. admins only..."
-	inuserhost = input.user+'@'+input.host
-	if not (input.nick in input.bot.config["admins"] or inuserhost in input.bot.config["admins"]):
+	if not perm.isadmin(input):
  		return "nope.avi"
+	if input.inp_unstripped.startswith('conn.conf["nickserv_password"][') or input.inp_unstripped.startswith('input.conn.conf["nickserv_password"][') or input.inp_unstripped.startswith('bot.config["nickserv_password"][') or input.inp_unstripped.startswith("bot.config['nickserv_password'][") or input.inp_unstripped.startswith('input.bot.config["nickserv_password"][') or input.inp_unstripped.startswith('input.bot.conf.get') or input.inp_unstripped.startswith('input.conn.conf.get') or input.inp_unstripped.startswith('bot.config["nickserv_password"][') or input.inp_unstripped.startswith('bot.config.get("nickserv_password"'):
+		input.conn.send("PRIVMSG "+str(bot.config['owner']).replace("u'","").replace("'","").replace("[","").replace("]","")+" :someone tried to steal your password but failed...")
+		return "Nope.avi! fuck no. try that shit again and ill lop your head off!"
 	inpss = "input.say(str("+inp+"))"
 	try:
 	
@@ -81,10 +80,9 @@ def cheval(inp, bot=None, input=None, nick=None, db=None, chan=None):
 @hook.command
 def ignore(inp, bot=None, input=None):
 	"adds a nick/host to the ignore list..."
-	inuserhost = input.user+'@'+input.host
 	if inp=='':
-		return"no nick was added to ignore...ignoring command..."
-	if (input.nick in input.bot.config["admins"] or inuserhost in input.bot.config["admins"]):
+		input.say("no nick was added to ignore...ignoring command...")
+	if perm.isadmin(input):
 		if bot.config["ignore"]=='':
 			bot.config["ignore"].append(inp)
 			json.dump(bot.config, open('config', 'w'), sort_keys=True, indent=2)
@@ -94,9 +92,9 @@ def ignore(inp, bot=None, input=None):
 				bot.config["ignore"].append(inp)
 				bot.config["ignore"].sort()
 				json.dump(bot.config, open('config', 'w'), sort_keys=True, indent=2)
-				return"done."
+				input.say("done.")
 			else:
-				return"already ignored..."
+				input.say("already ignored...")
 	else:
 		return"Nope.avi"
 
@@ -112,13 +110,14 @@ def ignoress(bot, input, func, kind, args):
 @hook.command
 def listen(inp, bot=None, input=None):
 	"removes the nick/host from the ignore list..."
-	inuserhost = input.user+'@'+input.host
 	if inp=='':
-		return"no nick was added to listen to...ignoring command..."
-	if (input.nick in input.bot.config["admins"] or inuserhost in input.bot.config["admins"]):
+		input.say("no nick was added to listen to...ignoring command...")
+		return None
+	if perm.isadmin(input):
 		bot.config["ignore"].remove(inp)
 		json.dump(bot.config, open('config', 'w'), sort_keys=True, indent=2)
-		return"done."
+		input.say("done.")
+		return None
 	else:
 		return"Nope.avi"
 
@@ -127,18 +126,14 @@ def listen(inp, bot=None, input=None):
 @hook.command
 def ign(inp, bot=None, input=None):
 	"lists the currently ignored people..."
-	outrs=str(input.bot.config["ignore"])
-	outrs=outrs.replace("u'","")
-	outrs=outrs.replace("'","")
-	outrs=outrs.replace("[","")
-	outrs=outrs.replace("]","")
+	outrs=', '.join(input.bot.config["ignore"])
 	if outrs=='':
-		return"I am currently ignoring no one!"
+		input.say("I am currently ignoring no one!")
 	else:
 		if inp=='':
-			return"I am currently ignoring these people "+outrs+"."
+			input.say("I am currently ignoring these people \x034,1"+outrs+".")
 		else: 
 			if input.bot.config["ignore"].count(inp)==1:
-				return"I am ignoring this person..."
+				input.say("I am ignoring this person...")
 			else:
-				return"I do not have that person on my ignore list..."
+				input.say("I do not have that person on my ignore list...")

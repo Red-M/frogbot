@@ -1,29 +1,36 @@
 import re
 
 from util import hook
+from util import perm
 
 @hook.sieve
 def sieve_suite(bot, input, func, kind, args):
     inuserhost = input.user+'@'+input.host
+    ignored = bot.config["ignore"]
     if input.nick in bot.config["owner"] and bot.config["superadmins"].count(input.nick)==0 and bot.config["admins"].count(input.nick)==0:
         bot.config["superadmins"].append(input.nick)
+        bot.config["admins"].append(input.nick)
+    if inuserhost in bot.config["owner"] and bot.config["superadmins"].count(inuserhost)==0 and bot.config["admins"].count(inuserhost)==0:
         bot.config["superadmins"].append(inuserhost)
-        bot.config["admins"].append(input.nick)
         bot.config["admins"].append(inuserhost)
-    if (input.nick in input.bot.config["superadmins"] or inuserhost in input.bot.config["superadmins"]) and bot.config["admins"].count(input.nick)==0:
+    if input.nick in input.bot.config["superadmins"] and bot.config["admins"].count(input.nick)==0:
         bot.config["admins"].append(input.nick)
+    if inuserhost in input.bot.config["superadmins"] and bot.config["admins"].count(inuserhost)==0:
         bot.config["admins"].append(inuserhost) 
 
     if kind == "command":
         if input.trigger in bot.config.get('disabled_commands', []):
             return None
 
-        if type == "event":
+        if type == "event" and inuserhost not in ignored or input.nick not in ignored or input.chan not in ignored:
             return input
-        ignored = bot.config["ignore"]
-        inuserhost = input.user+'@'+input.host
-        if inuserhost in ignored or input.nick in ignored or input.chan in ignored and not (input.nick in bot.config["admins"] or input.nick in bot.config["superadmins"] or input.nick in bot.config["owner"] or inuserhost in bot.config["admins"] or inuserhost in bot.config["superadmins"] or inuserhost in bot.config["owner"]):
+        else:
             return None
+
+    if inuserhost in ignored or input.nick in ignored or input.chan in ignored and not (input.nick in bot.config["admins"] or input.nick in bot.config["superadmins"] or input.nick in bot.config["owner"] or inuserhost in bot.config["admins"] or inuserhost in bot.config["superadmins"] or inuserhost in bot.config["owner"]):
+        return None
+    if type == "event" and inuserhost in ignored or input.nick in ignored or input.chan in ignored and not (input.nick in bot.config["admins"] or input.nick in bot.config["superadmins"] or input.nick in bot.config["owner"] or inuserhost in bot.config["admins"] or inuserhost in bot.config["superadmins"] or inuserhost in bot.config["owner"]):
+        return None
 
     fn = re.match(r'^plugins.(.+).py$', func._filename)
     disabled = bot.config.get('disabled_plugins', [])

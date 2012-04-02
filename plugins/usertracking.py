@@ -214,8 +214,15 @@ def tracking(inp, command=None, input=None, users=None):
 
 @hook.command
 def mymodes(inp, input=None, users=None):
-    modes = users[input.chan].usermodes[input.nick]
-    if len(modes):
-        return "+" + "".join(modes)
+    if inp=='':
+        modes = users[input.chan].usermodes[input.nick]
+        if len(modes):
+            input.say("+" + "".join(modes))
+        else:
+            input.say("but you have no modes ...")
     else:
-        return "but you have no modes ..."
+        modes = users[input.chan].usermodes[inp]
+        if len(modes):
+            input.say("+" + "".join(modes))
+        else:
+            input.say("but you have no modes ...")

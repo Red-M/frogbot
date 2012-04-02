@@ -4,10 +4,11 @@ import datetime
 import ftplib
 import time
 from itertools import izip
+from util import perm
 
 @hook.command
 def up(inp, input=None):
-	if input.nick in input.bot.config["owner"]:
+	if perm.isowner(input):
         repnick=input.nick
 		testss = True
 		while testss:            
@@ -39,6 +40,6 @@ def up(inp, input=None):
 			input.conn.send("PRIVMSG "+repnick+" :doing another backup.")
 			print "4"
 			testss = True 
-	if not input.nick==repnick:
+	if not perm.isowner(input):
 		input.conn.send("PRIVMSG "+input.nick+" Nope.avi")
         input.conn.send("PRIVMSG "+bot.config["owner"]+" :"+input.nick+" tried to use the auto backup command.")

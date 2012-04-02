@@ -5,7 +5,7 @@ from util import hook
 
 
 @hook.command(autohelp=False)
-def umem(inp):
+def vmem(inp, input=None):
     ".mem -- returns bot's current memory usage -- linux/windows only"
 
     if os.name == 'posix':
@@ -16,7 +16,7 @@ def umem(inp):
         for key in keys:
             if (float(status[key].replace(" kB",""))/1024)>1:
                 status[key]=str(float(status[key].replace(" kB",""))/1024)+" MB"
-        return ', '.join(key + ':' + status[key] for key in keys)
+        input.say(', '.join(key + ':\x034,2 ' + status[key]+"\x034,2" for key in keys))
 
     elif os.name == 'nt':
         cmd = "tasklist /FI \"PID eq %s\" /FO CSV /NH" % os.getpid()
@@ -26,6 +26,4 @@ def umem(inp):
         for amount in re.findall(r'([,0-9]+) K', out):
             total += int(amount.replace(',', ''))
 
-        return 'memory usage: %d MB' % total/1024
-
-    return mem.__doc__
+        input.say('memory usage: \x034,1 '+str(float(total)/1024)+' MB')
