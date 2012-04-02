@@ -7,20 +7,21 @@ from util import perm
 def sieve_suite(bot, input, func, kind, args):
     inuserhost = input.user+'@'+input.host
     ignored = bot.config["ignore"]
-    if perm.isowner(input) and bot.config["superadmins"].count(input.nick)==0 and bot.config["admins"].count(input.nick)==0:
+    if input.nick in bot.config["owner"] and bot.config["superadmins"].count(input.nick)==0 and bot.config["admins"].count(input.nick)==0:
         bot.config["superadmins"].append(input.nick)
         bot.config["admins"].append(input.nick)
-    if perm.isowner(input) and bot.config["superadmins"].count(inuserhost)==0 and bot.config["admins"].count(inuserhost)==0:
+    if inuserhost in bot.config["owner"] and bot.config["superadmins"].count(inuserhost)==0 and bot.config["admins"].count(inuserhost)==0:
         bot.config["superadmins"].append(inuserhost)
         bot.config["admins"].append(inuserhost)
-    if perm.issuperadmin(input) and bot.config["admins"].count(input.nick)==0:
+    if input.nick in bot.config["superadmins"] and bot.config["admins"].count(input.nick)==0:
         bot.config["admins"].append(input.nick)
-    if perm.issuperadmin(input) and bot.config["admins"].count(inuserhost)==0:
+    if inuserhost in bot.config["superadmins"] and bot.config["admins"].count(inuserhost)==0:
         bot.config["admins"].append(inuserhost) 
 
     if kind == "command":
         if input.trigger in bot.config["disabled_commands"]:
             return None
+
 
     if perm.isignored(input) or perm.isbot(input):
         if not perm.isadmin(input):
