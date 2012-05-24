@@ -33,6 +33,7 @@ if not hasattr(bot, 'config'):
 print 'Connecting to IRC'
 
 bot.conns = {}
+bot.auth = {}
 
 try:
     for name, conf in bot.config['connections'].iteritems():
@@ -46,8 +47,20 @@ try:
 except Exception, e:
     print 'ERROR: malformed config file', e
     sys.exit()
+bot.twitterlist = {}
+bot.twitterlists = {}
+if bot.auth=={}:
+    for xcon in bot.conns:
+        bot.auth[str(bot.conns[xcon].server)]={}
+        bot.auth[str(bot.conns[xcon].server)]["owner"]={}
+        bot.auth[str(bot.conns[xcon].server)]["superadmin"]={}
+        bot.auth[str(bot.conns[xcon].server)]["admin"]={}
+        bot.auth[str(bot.conns[xcon].server)]["none"]={}
 
 bot.persist_dir = os.path.abspath('persist')
+bot.logs_dir = os.path.abspath('logs')
+if not os.path.exists(bot.logs_dir):
+    os.mkdir(bot.logs_dir)
 if not os.path.exists(bot.persist_dir):
     os.mkdir(bot.persist_dir)
 

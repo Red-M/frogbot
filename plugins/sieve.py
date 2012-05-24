@@ -1,33 +1,24 @@
+#the plugin "awatch.py" written by Red-M on Github or Red_M on esper.net has been moved here.
 import re
-
-from util import hook
-from util import perm
+from util import hook, perm, munge
 
 @hook.sieve
 def sieve_suite(bot, input, func, kind, args):
     inuserhost = input.user+'@'+input.host
-    ignored = bot.config["ignore"]
-    if input.nick in bot.config["owner"] and bot.config["superadmins"].count(input.nick)==0 and bot.config["admins"].count(input.nick)==0:
-        bot.config["superadmins"].append(input.nick)
-        bot.config["admins"].append(input.nick)
-    if inuserhost in bot.config["owner"] and bot.config["superadmins"].count(inuserhost)==0 and bot.config["admins"].count(inuserhost)==0:
-        bot.config["superadmins"].append(inuserhost)
-        bot.config["admins"].append(inuserhost)
-    if input.nick in bot.config["superadmins"] and bot.config["admins"].count(input.nick)==0:
-        bot.config["admins"].append(input.nick)
-    if inuserhost in bot.config["superadmins"] and bot.config["admins"].count(inuserhost)==0:
-        bot.config["admins"].append(inuserhost) 
+    ignored = input.conn.conf['ignore']
+    if input.nick in input.conn.conf['owner'] and input.conn.conf['superadmins'].count(input.nick)==0 and input.conn.conf['admins'].count(input.nick)==0:
+        input.conn.conf['superadmins'].append(input.nick)
+        input.conn.conf['admins'].append(input.nick)
+    if inuserhost in input.conn.conf['owner'] and input.conn.conf['superadmins'].count(inuserhost)==0 and input.conn.conf['admins'].count(inuserhost)==0:
+        input.conn.conf['superadmins'].append(inuserhost)
+        input.conn.conf['admins'].append(inuserhost)
+    if input.nick in input.conn.conf['superadmins'] and input.conn.conf['admins'].count(input.nick)==0:
+        input.conn.conf['admins'].append(input.nick)
+    if inuserhost in input.conn.conf['superadmins'] and input.conn.conf['admins'].count(inuserhost)==0:
+        input.conn.conf['admins'].append(inuserhost)
 
     if kind == "command":
         if input.trigger in bot.config["disabled_commands"]:
-            return None
-
-
-    if perm.isignored(input) or perm.isbot(input):
-        if not perm.isadmin(input):
-            return None
-    if type == "event" and perm.isignored(input):
-        if not perm.isadmin(input):
             return None
 
     fn = re.match(r'^plugins.(.+).py$', func._filename)
@@ -46,14 +37,17 @@ def sieve_suite(bot, input, func, kind, args):
             if input.chan.lower() in denied_channels:
                 return None
 
+
+#the extended permissions were moved here.
     if args.get('adminonly', False):
-        if perm.isadmin(input):
+        if not perm.isadmin(input):
             return None
     if args.get('superadminonly', False):
-        if perm.issuperadmin(input):
+        if not perm.issuperadmin(input):
             return None
     if args.get('owneronly', False):
-        if perm.isowner(input):
+        if not perm.isowner(input):
             return None
+#extended permissions end here.
 
     return input

@@ -22,9 +22,22 @@ def help(inp, bot=None, pm=None):
                         funcs[func] = command
 
     commands = dict((value, key) for key, value in funcs.iteritems() if key not in ["8ballnooxt"])
-
     if not inp:
-        pm('available commands: ' + ' '.join(sorted(commands)))
+        length = 0
+        out = ["", ""]
+        well = []
+        for x in commands:
+            well.append(x)
+        well.sort()
+        for x in well:
+            if len(out[0]) + len(str(x)) > 405:
+                out[1] += " " + str(x)
+            else:
+                out[0] += " " + str(x)
+
+        pm("available commands: " + out[0][1:])
+        if out[1]:
+            pm(out[1][1:])
     else:
         if inp in commands:
             pm(commands[inp].__doc__)

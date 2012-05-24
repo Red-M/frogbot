@@ -1,4 +1,4 @@
-from util import hook
+from util import hook, perm, munge
 import sqlite3
 import re
 import time
@@ -8,12 +8,12 @@ import thread
 
 loaded = False
 userlock = thread.allocate_lock()
-flag_re = re.compile(r"^([@+]*)(.*)$")
+flag_re = re.compile(r"^([@~&%+]*)(.*)$")
 
 
 #controls access to user database
-def query(db, config, user, channel, permission):
-    if user in config["admins"]:
+def query(db, input, user, channel, permission):
+    if perm.isadmin(input):
         return True
 
     return False
@@ -34,7 +34,7 @@ class Users(object):
         userobj = self._user(nick, user, host)
         chanobj = self._chan(channel)
         chanobj.users[nick] = userobj
-        chanobj.usermodes[nick] = set(modes.replace("@", "o").replace("+", "v"))
+        chanobj.usermodes[nick] = set(modes.replace("@", "o").replace("~", "o").replace("&", "o").replace("%", "h").replace("+", "v"))
 
     def _exit(self, nick, channel):
         "all types of channel-=user events"
@@ -213,16 +213,17 @@ def tracking(inp, command=None, input=None, users=None):
 
 
 @hook.command
-def mymodes(inp, input=None, users=None):
+def mymodes(inp, input=None, bot=None):
     if inp=='':
-        modes = users[input.chan].usermodes[input.nick]
+        modes = input.conn.users[str(input.chan)].usermodes[input.nick][0]
         if len(modes):
             input.say("+" + "".join(modes))
         else:
-            input.say("but you have no modes ...")
+            input.say("None")
     else:
-        modes = users[input.chan].usermodes[inp]
+        modes = input.conn.users[input.chan].usermodes[inp][0]
         if len(modes):
-            input.say("+" + "".join(modes))
+            nickf = munge.muninput(input, bot, inp)
+            input.say(nickf+": +" + "".join(modes))
         else:
-            input.say("but you have no modes ...")
+            input.say("but "+nickf+" has no modes ...")

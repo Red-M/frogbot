@@ -14,9 +14,25 @@ if not os.path.exists('config'):
           {
             "local irc":
             {
+              "user": "frogbot",
+              "realname": "frogbot",
               "server": "localhost",
-              "nick": "frog",
-              "channels": ["#test"]
+              "nick": "MyNewFrogBot",
+              "channels": ["#test"],
+              "admins": ["Red_M"],
+              "superadmins": ["Red_M"],
+              "owner": ["Red_M"],
+              "reportchan": "#frog",
+              "restartcmd": "bot.py",
+              "bots": [],
+              "ftp_host": "",
+              "ftp_port": 21,
+              "ftp_user": "",
+              "ftp_pw": "",
+              "ftp_dir": "",
+              "ignore": [],
+              "twitterfeedchans": ["local irc":[]],
+              "rss-on": "True"
             }
           },
           "disabled_plugins": [],
@@ -28,11 +44,15 @@ if not os.path.exists('config'):
             "tvdb": "INSERT API KEY FROM thetvdb.com HERE",
             "bitly_user": "INSERT USERNAME FROM bitly.com HERE",
             "bitly_api": "INSERT API KEY FROM bitly.com HERE",
+            "adfly_usernumber": "INSERT USER NUMBER KEY FROM adf.ly HERE",
+            "adfly_api": "INSERT API KEY FROM adf.ly HERE",
             "wolframalpha": "INSERT API KEY FROM wolframalpha.com HERE",
             "lastfm": "INSERT API KEY FROM lastfm HERE",
             "mc_user": "INSERT MINECRAFT USERNAME HERE",
-            "mc_pass": "INSERT MINECRAFT PASSWORD HERE"
+            "mc_pass": "INSERT MINECRAFT PASSWORD HERE",
+			"google": "INSERT API KEY FROM GOOGLE.COM HERE"
           },
+          "log": "true",
           "censored_strings":
           [
             "DCC SEND",
@@ -44,14 +64,7 @@ if not os.path.exists('config'):
             "\\x01",
             "!coz",
             "!tell /x"
-          ],
-          "admins": ["Red_M"],
-          "superadmins": ["Red_M"],
-          "owner": ["Red_M"],
-          "reportchan": "#frog",
-		  "restartcmd": "",
-		  "bots": [],
-          "ignore": []
+          ]
         }''') + '\n')
 
 

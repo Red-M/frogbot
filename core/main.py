@@ -7,7 +7,7 @@ thread.stack_size(256* 256)  # reduce vm size
 
 class Input(dict):
     def __init__(self, conn, raw, prefix, command, params,
-                    nick, user, host, paraml, msg):
+                    nick, user, host, mask, paraml, msg):
 
         chan = paraml[0].lower()
         if chan == conn.nick.lower():  # is a PM
@@ -29,13 +29,14 @@ class Input(dict):
             conn.set_nick(nick)
 
         def me(msg):
-            conn.msg(chan, "\x01%s \x034,1 %s\x01" % ("ACTION", msg))
+            conn.msg(chan, "\x01%s \x02%s\x01" % ("ACTION", msg))
+ #           conn.msg(chan, "\x01%s \x034,1\x02%s\x01" % ("ACTION", msg))
 
         def notice(msg):
             conn.cmd('NOTICE', [nick, msg])
 
         dict.__init__(self, conn=conn, raw=raw, prefix=prefix, command=command,
-                    params=params, nick=nick, user=user, host=host,
+                    params=params, nick=nick, user=user, host=host, mask=mask,
                     paraml=paraml, msg=msg, server=conn.server, chan=chan,
                     notice=notice, say=say, reply=reply, pm=pm, bot=bot,
                     me=me, set_nick=set_nick, lastparam=paraml[-1])
@@ -57,6 +58,10 @@ def run(func, input):
     if args:
         if 'db' in args and 'db' not in input:
             input.db = get_db_connection(input.conn)
+        if 'db_auth' in args and 'db_auth' not in input:
+            input.db_auth = get_db_connection_auth()
+        if 'db_twitter' in args and 'db_twitter' not in input:
+            input.db_twitter = get_db_connection_twitter()
         if 'input' in args:
             input.input = input
         if 0 in args:

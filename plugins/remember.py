@@ -1,8 +1,8 @@
 """
-remember.py: written by Scaevolus 2010, modified by lahwran 2011
+remember.py: written by Scaevolus 2010, modified by lahwran 2011, modified by Red_M 2012
 """
 
-from util import hook
+from util import hook, perm
 import pyexec
 import usertracking
 import re
@@ -35,14 +35,14 @@ def get_memory(db, chan, word):
 
 
 def checkinp(chan, inp, localpm):
-    if not inp.split(" ")[0] == "." and ((chan.startswith('#') and localpm) or not localpm):
+    if not inp.split(" ")[0] == "." and (not(chan.startswith('#') and localpm) or not localpm):
         chan = defaultchan
         local = False
-    elif (chan.startswith('#') and localpm) or not localpm:
+    elif inp.split(" ")[0] == "." and (chan.startswith('#') and localpm) or not localpm:
         inp = " ".join(inp.split(" ")[1:])
         local = True
     else:
-        local = True
+        local = False
     return local, chan, inp.strip()
 
 
@@ -50,10 +50,14 @@ def checkinp(chan, inp, localpm):
 def no(inp, nick='', chan='', db=None, notice=None, bot=None, modes=None, input=None):
     ".no <word> is <data> -- remaps word to data"
     inuserhost = input.user+'@'+input.host
-    if modes.check("remember.no.no", db):
-        return
     local, chan, inp = checkinp(chan, inp, True)
-
+    check = inp.split(" ")
+    if check[0] == '.':
+        local = True
+    else:
+        local = False
+        chan = defaultchan
+    
     db_init(db)
     try:
         head, tail = inp.split(" ", 1)
@@ -62,7 +66,7 @@ def no(inp, nick='', chan='', db=None, notice=None, bot=None, modes=None, input=
     if tail.startswith("is "):
         tail = " ".join(tail.split(" ")[1:])
 
-    if tail.startswith("<locked") and not modes.check("remember.lock", db) and ((input.nick not in input.bot.config["admins"] and inuserhost not in input.bot.config["admins"])):
+    if tail.startswith("<locked") and (not(perm.isadmin(input))):
         notice(("[local]" if local else "") + "you may not lock factoids.")
         return
 
@@ -71,12 +75,11 @@ def no(inp, nick='', chan='', db=None, notice=None, bot=None, modes=None, input=
     if not data:
         notice("but '%s' doesn't exist!" % head.replace("'", "`"))
         return
-    if data and data.startswith("<locked") and not modes.check("remember.lock", db) and ((input.nick not in input.bot.config["admins"] and inuserhost not in input.bot.config["admins"])):
+    if data and data.startswith("<locked") and (not(perm.isadmin(input))):
         notice(("[local]" if local else "") + "that factoid is locked, sorry.")
         return
 
-    db.execute("replace into memory(chan, word, data, nick) values"
-               " (?,lower(?),?,?)", (chan, head, tail, nick))
+    db.execute("replace into memory(chan, word, data, nick) values (?,lower(?),?,?)", (chan, head, tail, nick))
     print "replace into memory(chan, word, data, nick) values (?,lower(?),?,?)", repr((chan, head, tail, nick))
     db.commit()
     notice('forgetting "%s", remembering this instead.' % \
@@ -89,12 +92,17 @@ def no(inp, nick='', chan='', db=None, notice=None, bot=None, modes=None, input=
 def remember(inp, nick='', chan='', db=None, input=None, notice=None, bot=None):
     ".remember [.] <word> is <data> -- maps word to data in the memory, '.' means here only"
     inuserhost = input.user+'@'+input.host
-    if input.modes.check("remember.no.remember", db):
-        return
     db_init(db)
 
     local, chan, inp = checkinp(chan, inp, True)
 
+    check = inp.split(" ")
+    if check[0] == '.':
+        local = True
+    else:
+        local = False
+        chan = defaultchan
+    
     try:
         head, tail = inp.split(" ", 1)
     except ValueError:
@@ -102,13 +110,13 @@ def remember(inp, nick='', chan='', db=None, input=None, notice=None, bot=None):
     if tail.startswith("is "):
         tail = " ".join(tail.split(" ")[1:])
 
-    if tail.startswith("<locked") and not input.modes.check("remember.lock", db) and ((input.nick not in input.bot.config["admins"] and inuserhost not in input.bot.config["admins"])):
+    if tail.startswith("<locked") and (not(perm.isadmin(input))):
         notice(("[local]" if local else "") + "you may not lock factoids.")
         return
 
     data = get_memory(db, chan, head)
 
-    if data and data.startswith("<locked") and not input.modes.check("remember.lock", db) and ((input.nick not in input.bot.config["admins"] and inuserhost not in input.bot.config["admins"])):
+    if data and data.startswith("<locked") and (not(perm.isadmin(input))):
         input.notice(("[local]" if local else "") + "that factoid is locked.")
         return
     if data and not data.startswith("<forgotten>"):
@@ -117,8 +125,7 @@ def remember(inp, nick='', chan='', db=None, input=None, notice=None, bot=None):
     elif data and data.startswith("<forgotten>"):
         input.notice(("[local]" if local else "") + "permanently deleting " + repr(data) + " to accomodate this")
 
-    db.execute("replace into memory(chan, word, data, nick) values"
-               " (?,lower(?),?,?)", (chan, head, tail, nick))
+    db.execute("replace into memory(chan, word, data, nick) values (?,lower(?),?,?)", (chan, head, tail, nick))
     print "replace into memory(chan, word, data, nick) values (?,lower(?),?,?)", repr((chan, head, tail, nick))
     db.commit()
     notice(("[local]" if local else "") + 'done.')
@@ -128,54 +135,30 @@ def remember(inp, nick='', chan='', db=None, input=None, notice=None, bot=None):
 def forget(inp, chan='', db=None, nick='', notice=None, modes=None, input=None):
     ".forget [.] <word> -- forgets the mapping that word had, '.' means here only"
     inuserhost = input.user+'@'+input.host
-    if modes.check("remember.no.forget", db):
-        return
     local, chan, inp = checkinp(chan, inp, True)
+    check = inp.split(" ")
+    if check[0] == '.':
+        local = True
+    else:
+        local = False
+        chan = defaultchan
     db_init(db)
 
     data = get_memory(db, chan, inp)
-    if data and data.startswith("<locked") and not modes.check("remember.lock", db) and ((input.nick not in input.bot.config["admins"] and inuserhost not in input.bot.config["admins"])):
+    print("data: "+data)
+    if data and data.startswith("<locked") and (not(perm.isadmin(input))):
         notice(("[local]" if local else "") + "that factoid is locked.")
         return
     if data and not data.startswith("<forgotten>"):
-        db.execute("replace into memory(chan, word, data, nick) values"
-               " (?,lower(?),?,?)", (chan, inp, "<forgotten>" + data, nick))
-        print "replace into memory(chan, word, data, nick) values (?,lower(?),?,?)", repr((chan, inp, "<forgotten>" + data, nick))
-        #db.execute("delete from memory where chan=? and word=lower(?)",
-        #           (chan, inp))
+        db.execute("delete from memory where chan=? and word=lower(?)",(chan, inp))
+        #print "replace into memory(chan, word, data, nick) values (?,lower(?),?,?)", repr((chan, inp, "<forgotten>" + data, nick))
+        #db.execute("delete from memory where chan=? and word=lower(?)",(chan, inp))
         db.commit()
         notice(("[local]" if local else "") + ('forgot `%s`' % data.replace('`', "'")))
     elif data:
         notice(("[local]" if local else "") + "I already archived that.")
     else:
         notice(("[local]" if local else "") + "I don't know about that.")
-
-
-@hook.command
-def unforget(inp, chan='', db=None, nick='', notice=None, modes=None, input=None):
-    ".unforget [.] <word> -- re-remembers the mapping the word had before, '.' means here only "
-    inuserhost = input.user+'@'+input.host
-    if modes.check("remember.no.unforget", db):
-        return
-    db_init(db)
-
-    local, chan, inp = checkinp(chan, inp, True)
-
-    data = get_memory(db, chan, inp)
-    if data and data.startswith("<locked") and not modes.check("remember.lock", db) and ((input.nick not in input.bot.config["admins"] and inuserhost not in input.bot.config["admins"])):
-        input.notice(("[local]" if local else "") + "that factoid is locked.")
-        return
-
-    if data and data.startswith("<forgotten>"):
-        db.execute("replace into memory(chan, word, data, nick) values"
-               " (?,lower(?),?,?)", (chan, inp, data.replace("<forgotten>", "").strip(), nick))
-        print "replace into memory(chan, word, data, nick) values (?,lower(?),?,?)", repr((chan, inp, data.replace("<forgotten>", "").strip(), nick))
-        db.commit()
-        notice(("[local]" if local else "") + ('unforgot `%s`' % data.replace('`', "'")))
-    elif data:
-        notice(("[local]" if local else "") + "I still remember that.")
-    else:
-        notice(("[local]" if local else "") + "I never knew about that.")
 
 
 @hook.command
@@ -226,7 +209,7 @@ def mem(inp, chan='', db=None, nick='', notice=None, user='', host='', bot=None,
     if len(split):
         if not split[0] in commands:
             return "no such command"
-        if not modes.check("remember." + commands[split[0]][2], db) and ((input.nick not in input.bot.config["admins"] and inuserhost not in input.bot.config["admins"])):
+        if not (perm.isadmin(input)):
             return "you do not have permission to use that command"
         if len(split) == commands[split[0]][0] + 1:
             func = commands[split[0]][1]
@@ -239,11 +222,9 @@ def mem(inp, chan='', db=None, nick='', notice=None, user='', host='', bot=None,
 
 @hook.regex(r'^[?!](.+)')  # groups: (mode,word,args,redirectmode,redirectto)
 def question(inp, chan='', say=None, db=None, input=None, nick="", me=None, bot=None, notice=None):
-    "!factoid -- shows what data is associated with word"
+    "!?factoid -- shows what data is associated with word"
     inuserhost = input.user+'@'+input.host
     filterhistory = []  # loop detection, maximum recursion depth(s)
-    if input.modes.check("remember.no.question", db):
-        return
 
     def varreplace(orig, variables):
         for i in variables.keys():
@@ -278,11 +259,11 @@ def question(inp, chan='', say=None, db=None, input=None, nick="", me=None, bot=
 		else:
 		    filterhistory.remove(orig)
 		    return filters([filterinp, setternick], variables, filterhistory)
-            elif filtername == "pyexec":
+            elif filtername == "pyexec" and perm.isadmin(input):
                 preargs = ""
                 for i in variables.keys():
                     preargs += i + "=" + repr(unicode(variables[i]).encode('utf8')) + ";"
-                print preargs + filterinp
+                #print "\n"+preargs+"\n" + filterinp+"\n"
                 return filters([pyexec.python(preargs + filterinp), setternick], variables, filterhistory)
             elif filtername.startswith("locked"):
 		filterhistory.remove(orig)
@@ -291,12 +272,12 @@ def question(inp, chan='', say=None, db=None, input=None, nick="", me=None, bot=
             if cmd:
                 trigger = cmd.group(1).lower()
                 cmdfunc, cmdargs = bot.commands[trigger]
-                if trigger in ["no", "remember", "forget", "unforget", "python"]:
+                if trigger in ["no", "remember", "forget", "unforget", "python", "ply", "cheval", "checkvalue"]:
                     return "Nope.avi"
                 outputlines = []
 
                 def cmdsay(o):
-                    print "cmdsay out:", repr(o)
+                    #print "cmdsay out:", repr(o)
                     if filter_re.search(o):
                         outputlines.append(o)
                     else:
@@ -359,7 +340,7 @@ def question(inp, chan='', say=None, db=None, input=None, nick="", me=None, bot=
     def finaloutput(s, redir, redirto, input, special=None):
         if not s:
             return
-        if redirto.startswith("#") and ((input.nick not in input.bot.config["admins"] and inuserhost not in input.bot.config["admins"])):
+        if redirto.startswith("#") and (not(perm.isadmin(input))):
             redirto = nick
             s = "I am not sending factoids into channels. I am not that stupid and only bot admins can do this."
         if redir == ">" and not special:
@@ -405,20 +386,17 @@ def question(inp, chan='', say=None, db=None, input=None, nick="", me=None, bot=
         local = get_memory(db, chan, word)
         default = get_memory(db, defaultchan, word)
         if local:
-              ignored = bot.config["ignore"]
-              if input.host in ignored or input.nick in ignored or input.chan in ignored and ((input.nick not in input.bot.config["admins"] and inuserhost not in input.bot.config["admins"])):
+              if perm.isignored(input) and (not(perm.isadmin(input))):
                    return None
               else:
                    output("[local] " + local)
         if default:
-              ignored = bot.config["ignore"]
-              if input.host in ignored or input.nick in ignored or input.chan in ignored and ((input.nick not in input.bot.config["admins"] and inuserhost not in input.bot.config["admins"])):
+              if perm.isignored(input) and (not(perm.isadmin(input))):
                    return None
               else:
                    output("[global] " + default)
     else:
-         ignored = bot.config["ignore"]
-         if input.host in ignored or input.nick in ignored or input.chan in ignored and ((input.nick not in input.bot.config["admins"] and inuserhost not in input.bot.config["admins"])):
+         if perm.isignored(input) and (not(perm.isadmin(input))):
               return None
          else:
               output(filters(retrieve(word, chan), variables, filterhistory))

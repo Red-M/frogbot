@@ -16,15 +16,6 @@ def decode(txt):
     return txt.decode('utf-8', 'ignore')
 
 
-def censor(text):
-    replacement = '[censored]'
-    if 'censored_strings' in bot.config:
-        words = map(re.escape, bot.config['censored_strings'])
-        regex = re.compile('(%s)' % "|".join(words))
-        text = regex.sub(replacement, text)
-    return text
-
-
 class crlf_tcp(object):
     "Handles tcp connections that consist of utf-8 lines ending with crlf"
 
@@ -40,6 +31,7 @@ class crlf_tcp(object):
 
     def create_socket(self):
         return socket.socket(socket.AF_INET, socket.TCP_NODELAY)
+
 
     def run(self):
         self.socket.connect((self.host, self.port))
@@ -88,7 +80,17 @@ class crlf_tcp(object):
     def send_loop(self):
         while True:
             line = self.oqueue.get().splitlines()[0][:500]
-            print "(BOT):: %r" % line
+            line2 = ("(BOT)::("+self.host+") %r" % line)
+            if unicode(":TWITTER FEED:") in unicode(line):
+                line2 = ("(BOT):: twitter action.")
+            if unicode(":TWITTER LIST FEED:") in unicode(line):
+                line2 = ("(BOT):: twitter action.")
+            if unicode("PONG :") in unicode(line) or unicode('PONG :') in unicode(line):
+                line2 = ("(BOT)::("+self.host[:7]+") Ping Pong.")
+            if unicode("PING :") in unicode(line) or unicode('PING :') in unicode(line):
+                line2 = ("\0")
+            if not line2=="\0":
+                print(line2)
             self.obuffer += line.encode('utf-8', 'replace') + '\r\n'
             while self.obuffer:
                 sent = self.socket.send(self.obuffer)
@@ -150,8 +152,7 @@ class IRC(object):
         self.set_pass(self.conf.get('server_password'))
         self.set_nick(self.nick)
         self.cmd("USER",
-            [conf.get('user', 'frog'), "3", "*", conf.get('realname',
-                'Red_Dragon')])
+            [conf.get('user'), "3", "*", conf.get('realname')])
 
     def parse_loop(self):
         while True:
@@ -167,13 +168,14 @@ class IRC(object):
                 prefix, command, params = irc_noprefix_rem(msg).groups()
             nick, user, host = irc_netmask_rem(prefix).groups()
             paramlist = irc_param_ref(params)
+            mask = user + "@" + host
             lastparam = ""
             if paramlist:
                 if paramlist[-1].startswith(':'):
                     paramlist[-1] = paramlist[-1][1:]
                 lastparam = paramlist[-1]
             self.out.put([msg, prefix, command, params, nick, user, host,
-                    paramlist, lastparam])
+                    mask, paramlist, lastparam])
             if command == "PING":
                 self.cmd("PONG", paramlist)
 
@@ -190,7 +192,7 @@ class IRC(object):
     def msg(self, target, text):
         self.cmd("PRIVMSG", [target, text])
 
-    def cmd(self, command, params=None):
+    def cmd(self, command, params):
         if params:
             params[-1] = ':' + params[-1]
             self.send(command + ' ' + ' '.join(map(censor, params)))
@@ -201,6 +203,13 @@ class IRC(object):
     def send(self, str):
         self.conn.oqueue.put(str)
 
+def censor(text):
+    replacement = '[Nope.avi]'
+    if 'censored_strings' in bot.config:
+        words = map(re.escape, bot.config['censored_strings'])
+        regex = re.compile('(%s)' % "|".join(words))
+        text = regex.sub(replacement, text)
+    return text
 
 class FakeIRC(IRC):
     def __init__(self, server, nick, port=6667, channels=[], conf={}, fn=""):

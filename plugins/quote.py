@@ -1,8 +1,5 @@
-import random
-import re
-import time
-
-from util import hook
+import random, re, time
+from util import hook, munge
 
 
 def add_quote(db, chan, nick, add_nick, msg):

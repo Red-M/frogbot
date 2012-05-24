@@ -3,13 +3,12 @@ import socket
 import subprocess
 import time
 
-from util import hook, http
-
+from util import hook, http, munge, perm
 socket.setdefaulttimeout(10)  # global setting
 
 
 def get_version():
-    ret = 'Red_Ms skybot.'
+    ret = 'Frogbot.'
 
     return ret
 
@@ -24,23 +23,28 @@ def get_version():
 
 #join channels when invited
 @hook.event('INVITE')
-def invite(paraml, conn=None):
+def invite(paraml, conn=None, input=None, bot=None):
+    repchan = input.conn.conf["reportchan"]
+    nickf = munge.munge(0, input, bot, 0, "")
     if paraml[-1] == "#bottestspamchan":
         return "no."
     conn.join(paraml[-1])
 
 
 @hook.event('004')
-def onjoin(paraml, conn=None, bot=None):
+def onjoin(paraml, conn=None, bot=None, input=None):
+    input.conn.send("NICK "+conn.conf["nick"])
     # identify to services
     nickserv_password = conn.conf.get('nickserv_password', '')
     nickserv_name = conn.conf.get('nickserv_name', 'nickserv')
     nickserv_command = conn.conf.get('nickserv_command', 'IDENTIFY %s')
+    nickserv_command2 = conn.conf.get('nickserv_command', 'REGAIN %s %s')
     if nickserv_password:
-        if nickserv_password in bot.config['censored_strings']:
-	    bot.config['censored_strings'].remove(nickserv_password)
+        if nickserv_password in bot.config["censored_strings"]:
+            for num in str(bot.config["censored_strings"].count(nickserv_password)):
+                bot.config["censored_strings"].remove(nickserv_password)
+        conn.msg(nickserv_name, "REGAIN "+conn.nick+" "+nickserv_password)
         conn.msg(nickserv_name, nickserv_command % nickserv_password)
-        bot.config['censored_strings'].append(nickserv_password)
         time.sleep(1)
 
     # set mode on self
@@ -50,7 +54,7 @@ def onjoin(paraml, conn=None, bot=None):
 
     # join channels
     for channel in conn.channels:
-        conn.join(channel)
+        conn.send('JOIN '+channel)
         time.sleep(1)  # don't flood JOINs
 
     # set user-agent
@@ -60,4 +64,4 @@ def onjoin(paraml, conn=None, bot=None):
 @hook.regex(r'^\x01VERSION\x01$')
 def version(inp, notice=None):
     rev = get_version()
-    notice("Red_M's modded version of crow and cloudbot. custom dev! ##crow #cobalt #cobaltdev #medsouz #risucraft #frog #Redserv")
+    

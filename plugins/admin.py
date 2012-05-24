@@ -2,20 +2,24 @@
 #  Broken by The Noodle
 #  Improved by Lukeroge
 #  edited for frog by Red-M on github or Red_M on esper.net
-from util import hook
-from util import perm
+from util import hook, perm
+import json
 
 # Added to make the move to a new auth system a lot easier
 # Improved to account for frog's permissions system and moved the improvement to plugins/util/perm.py
 
 @hook.command
-def join(inp, input=None, db=None, notice=None):
+def join(inp, input=None, db=None, notice=None, bot=None):
     ".join <channel> -- joins a channel"
     if not perm.isadmin(input):
         notice("Only bot admins can use this command!")
         return
     notice("Attempting to join " + inp + "...")
     input.conn.send("JOIN " + inp)
+    if input.conn.conf['channels'].count(inp)==0:
+        input.conn.conf['channels'].append(inp)
+        json.dump(bot.config, open('config', 'w'), sort_keys=True, indent=1)
+        return"Done."
 
 @hook.command
 def cycle(inp, input=None, db=None, notice=None):
@@ -28,13 +32,17 @@ def cycle(inp, input=None, db=None, notice=None):
     input.conn.send("JOIN " + inp)
 
 @hook.command
-def part(inp, input=None, notice=None):
+def part(inp, input=None, notice=None, bot=None):
     ".part <channel> -- leaves a channel"
     if not perm.isadmin(input):
         notice("Only bot admins can use this command!")
         return
     notice("Attempting to part from " + inp + "...")
     input.conn.send("PART " + inp)
+    if input.conn.conf['channels'].count(inp)==1:
+        input.conn.conf['channels'].remove(inp)
+        json.dump(bot.config, open('config', 'w'), sort_keys=True, indent=1)
+        return"Done."
 
 @hook.command
 def nick(inp, input=None, notice=None):
@@ -81,7 +89,7 @@ def say(inp, input=None, notice=None):
     ".say [channel] <message> -- makes the bot say <message> in [channel]. if [channel] is blank the bot will say the <message> in the channel the command was used in."
     if not perm.isadmin(input):
         notice("Only bot admins can use this command!")
-        return
+        return None
     split = inp.split(" ")
     if split[0][0] == "#":
         message = ""
@@ -110,13 +118,15 @@ def act(inp, input=None, notice=None):
         for x in split[1:]:
             message = message + x + " "
         message = message[:-1]
-        out = "PRIVMSG %s :\x01ACTION \x01\x034,1 %s\x01" % (split[0], message)
+        out = "PRIVMSG %s :\x01ACTION \x01 %s\x01" % (split[0], message)
+#        out = "PRIVMSG %s :\x01ACTION \x01\x034,1 %s\x01" % (split[0], message)
     else:
         message = ""
         for x in split[0:]:
             message = message + x + " "
         message = message[:-1]
-        out = "PRIVMSG %s :\x01ACTION \x034,1 %s\x01" % (input.chan, message)
+        out = "PRIVMSG %s :\x01ACTION %s\x01" % (input.chan, message)
+#        out = "PRIVMSG %s :\x01ACTION \x034,1 %s\x01" % (input.chan, message)
     input.conn.send(out)
 
 @hook.command
@@ -128,9 +138,7 @@ def topic(inp, input=None, notice=None):
     split = inp.split(" ")
     split[0] = split[0]+ " :"
     lenchan = len(split[0])
-    print lenchan+1
     split = str(' '.join(split))
-    print split[0][0]
     if split[0][0] == "#":
         if testsf==True:
             out = "TOPIC %s" % (split)
@@ -141,67 +149,78 @@ def topic(inp, input=None, notice=None):
             out = "PRIVMSG "+input.nick+" :Cant set topic. Not enough arguements in command." 
     input.conn.send(out)
 	
-@hook.command(adminonly=True)
-def ban(inp, conn=None, chan=None, notice=None):
-    ".ban [channel] <user> -- Makes the bot ban <user> in [channel]. "\
-    "If [channel] is blank the bot will ban <user> in "\
-    "the channel the command was used in."
-    inp = inp.split(" ")
-    if inp[0][0] == "#":
-        chan = inp[0]
-        user = inp[1]
-        out = "MODE %s +b %s" % (chan, user)
-    else:
-        user = inp[0]
-        out = "MODE %s +b %s" % (chan, user)
-    notice("Attempting to ban %s from %s..." % (user, chan))
-    conn.send(out)
+@hook.command
+def ban(inp, conn=None, chan=None, notice=None, input=None):
+    if perm.isadmin(input):
+        inp = inp.split(" ")
+        if inp[0][0] == "#":
+            chan = inp[0]
+            user = inp[1]
+            out = "MODE %s +b %s" % (chan, user)
+        else:
+            user = inp[0]
+            out = "MODE %s +b %s" % (chan, user)
+        notice("Attempting to ban %s from %s..." % (user, chan))
+        conn.send(out)
 
 
 @hook.command(adminonly=True)
-def unban(inp, conn=None, chan=None, notice=None):
-    ".unban [channel] <user> -- Makes the bot unban <user> in [channel]. "\
-    "If [channel] is blank the bot will unban <user> in "\
-    "the channel the command was used in."
-    inp = inp.split(" ")
-    if inp[0][0] == "#":
-        chan = inp[0]
-        user = inp[1]
-        out = "MODE %s -b %s" % (chan, user)
-    else:
-        user = inp[0]
-        out = "MODE %s -b %s" % (chan, user)
-    notice("Attempting to unban %s from %s..." % (user, chan))
-    conn.send(out)
+def unban(inp, conn=None, chan=None, notice=None, input=None):
+    if perm.isadmin(input):
+        inp = inp.split(" ")
+        if inp[0][0] == "#":
+            chan = inp[0]
+            user = inp[1]
+            out = "MODE %s -b %s" % (chan, user)
+        else:
+            user = inp[0]
+            out = "MODE %s -b %s" % (chan, user)
+        notice("Attempting to unban %s from %s..." % (user, chan))
+        conn.send(out)
 
-@hook.command(adminonly=True)
-def kickban(inp, chan=None, conn=None, notice=None):
-    ".kickban [channel] <user> [reason] -- Makes the bot kickban <user> in [channel] "\
-    "If [channel] is blank the bot will kickban the <user> in "\
-    "the channel the command was used in."
-    inp = inp.split(" ")
-    if inp[0][0] == "#":
-        chan = inp[0]
-        user = inp[1]
-        out1 = "MODE %s +b %s" % (chan, user)
-        out2 = "KICK %s %s" % (chan, user)
-        if len(inp) > 2:
-            reason = ""
-            for x in inp[2:]:
-                reason = reason + x + " "
-            reason = reason[:-1]
-            out = out + " :" + reason
-    else:
-        user = inp[0]
-        out1 = "MODE %s +b %s" % (chan, user)
-        out2 = "KICK %s %s" % (chan, user)
-        if len(inp) > 1:
-            reason = ""
-            for x in inp[1:]:
-                reason = reason + x + " "
-            reason = reason[:-1]
-            out = out + " :" + reason
+@hook.command
+def kickban(inp, chan=None, conn=None, notice=None, input=None):
+    if perm.isadmin(input):
+        inp = inp.split(" ")
+        if inp[0][0] == "#":
+            chan = inp[0]
+            user = inp[1]
+            out1 = "MODE %s +b %s" % (chan, user)
+            out2 = "KICK %s %s" % (chan, user)
+            if len(inp) > 2:
+                reason = ""
+                for x in inp[2:]:
+                    reason = reason + x + " "
+                reason = reason[:-1]
+                out = out + " :" + reason
+        else:
+            user = inp[0]
+            out1 = "MODE %s +b %s" % (chan, user)
+            out2 = "KICK %s %s" % (chan, user)
+            if len(inp) > 1:
+                reason = ""
+                for x in inp[1:]:
+                    reason = reason + x + " "
+                reason = reason[:-1]
+                out = out + " :" + reason
 
-    notice("Attempting to kickban %s from %s..." % (user, chan))
-    conn.send(out1)
-    conn.send(out2)
+        notice("Attempting to kickban %s from %s..." % (user, chan))
+        conn.send(out1)
+        conn.send(out2)
+
+@hook.command
+def mode(inp, conn=None, chan=None, notice=None, input=None):
+    if perm.isadmin(input):
+        inp = inp.split(" ")
+        if inp[0][0] == "#":
+            chan = inp[0]
+            user = inp[1]
+            inpmode = inp[2]
+            out = "MODE %s %s %s" % (chan, inpmode, user)
+        else:
+            chan = input.chan
+            user = inp[0]
+            inpmode = inp[1]
+            out = "MODE %s %s %s" % (chan, inpmode, user)
+        notice("Attempting to add the flag %s in %s to %s..." % (inpmode, chan, user))
+        conn.send(out)

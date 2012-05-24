@@ -36,6 +36,26 @@ def shorten(inp, bot = None):
         return "error: no api key set"
     return bitly(inp, api_user, api_key)
 
+def adflyss(url, user, apikey):
+    try:
+        if url[:8] == "https://":
+            url = "https://" + url
+        elif url[:7] != "http://":
+            url = "http://" + url
+        params = urlencode({'key': apikey, 'uid': user, 'advert_type': 'int', 'domain': 'adf.ly', 'url': url, 'format': 'json'})
+        return str(http.get("http://api.adf.ly/api.php?%s" % params))
+    except (HTTPError, ShortenError):
+        return "Could not shorten %s!" % url
+
+@hook.command
+def adfly(inp, bot = None):
+    ".adfly <url> - Makes an adf.ly shortlink to the url provided."
+    api_user = bot.config.get("api_keys", {}).get("adfly_usernumber", None)
+    api_key = bot.config.get("api_keys", {}).get("adfly_api", None)
+    if api_key is None:
+        return "error: no api key set"
+    return adflyss(inp, api_user, api_key)
+
 @hook.command
 def expand(inp, bot = None):
     ".expand <url> - Gets the original URL from a shortened link."

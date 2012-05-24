@@ -1,4 +1,4 @@
-from util import hook
+from util import hook, perm
 import re
 import random
 
@@ -15,22 +15,37 @@ kills = ["rips off <who>'s <body> and leaves them to die.",
         "sends <who> to /dev/null!",
         "feeds <who> coke and mentos till they pop!",
         "rips apart the atomic bonds that hold <who> together.",
+        "rips apart the atomic bonds that hold <who> together.",
+        "rips apart the atomic bonds that hold <who> together.",
         "removes <body> from <who> and leaves <who> to bleed out.",
-        "picks up <who> and throws <who> into the sun."]
+        "removes <body> from <who> and leaves <who> to bleed out.",
+        "removes <body> from <who> and leaves <who> to bleed out.",
+        "picks up <who> and throws <who> into the sun.",
+        "picks up <who> and throws <who> into the sun.",
+        "picks up <who> and throws <who> into the sun."
+        ]
 
 body = ['head',
         'arms',
         'leg',
         'arm',
         '"special parts"',
-        'atomic bonds']
+        'atomic bonds',
+        'atomic bonds',
+        'atomic bonds',
+        'atomic bonds',
+        'atomic bonds',
+        'atomic bonds'
+        ]
 
 @hook.command
 def kill(inp, me = None, nick = None, input=None, notice=None):
     ".kill <user> - kill a user"
     inuserhost = input.user+'@'+input.host
-    if inp in input.bot.config["admins"]: 
-        input.say("I am not killing one of my admins!")
+    if inp in input.conn.conf["admins"]: 
+        return("I am not killing one of my admins!")
+    if perm.isignored(input):
+        return None
     inp = inp.strip()
 
     if not re.match("^[A-Za-z0-9_|.-\]\[]*$", inp.lower()):
