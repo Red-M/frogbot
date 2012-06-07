@@ -1,37 +1,104 @@
-#plugin from Cloudev/cloudbot
-from util import hook, http, urlnorm
+# edited and fixed up abit by Red-M on github or Red_M on irc.esper.net
+from util import hook, http
+import urlhistory
+import httplib
 import re
+import urlparse
+import urllib2
+import repaste
 
+
+maxlen = 4086
 titler = re.compile(r'(?si)<title>(.+?)</title>')
 
 
-def get_title(url):
-    url = urlnorm.normalize(url.encode('utf-8'))
-    url = url.decode('utf-8')
-    # add http if its missing
-    if not url.startswith("http"):
-        url = "http://" + url
-    try:
-        # get the title
-        request = http.open(url)
-        real_url = request.geturl()
-        text = request.read()
-        text = text.decode('utf8')
-        match = titler.search(text)
-        title = match.group(1)
-    except:
-        return "Could not parse URL! Are you sure its valid?"
+@hook.regex(r".*(minecraftforum\.net/viewtopic\.php\?[\w=&]+)\b.*")
+def regex(inp, say=None):
+    "titles minecraftforum urls"
+    t = title("http://" + inp.group(1)).replace(" - Minecraft Forums", "")
+    if t == "Login":
+        return
+    say("mcforum title: " + t)
 
-    title = title
 
-    # if the url has been redirected, show us
-    if real_url == url:
-        return title
-    else:
-        return u"%s <=> %s" % (title, real_url)
+def check_response(headers):
+    type = headers.get("content-type", None)
 
-@hook.command("t")
+    if not type or "html" not in type:
+        reply = "Link is not HTML but %s" % type
+
+        length = headers.get("content-length", None)
+
+        if length is not None:
+            reply += ", length %s" % length
+
+        lastmodified = headers.get("last-modified", None)
+
+        if lastmodified is not None:
+            reply += ", last modified %s " % lastmodified
+
+        return reply
+
+
 @hook.command
-def title(inp, input=None):
-    ".title <url> -- gets the title of a web page"
-    input.say(get_title(inp))
+@hook.command("t")
+def title(inp, db=None, chan=None, bot=None, input=None):
+    ",title <url> - get title of <url>"
+    if '^' in input.paraml[1]:
+        inp = bot.chanseen[input.conn.server][input.chan][0]
+        if not "http://" in str(input.paraml[1]):
+            inp = str(inp).replace("www.","http://www.")
+        re1='((http|https)://.* )'
+        rg = re.compile(re1,re.IGNORECASE|re.DOTALL)
+        m = rg.findall(inp)
+        if m:
+            m = (''.join(m[0])).split(" ")[0]
+            inp = m
+    if not "http://" in inp:
+        inp = ""
+    if inp == "":
+        return ",title <url> - get title of <url>"
+    try:
+        parts = urlparse.urlsplit(inp)
+        conn = httplib.HTTPConnection(parts.hostname, timeout=10)
+        path = parts.path
+
+        if parts.query:
+            path += "?" + parts.query
+
+        conn.request('HEAD', path)
+        resp = conn.getresponse()
+
+        if not (200 <= resp.status < 400):
+            return "Error: HEAD %s %s " % (resp.status, resp.reason)
+
+        errors = check_response(dict(resp.getheaders()))
+
+        if errors:
+            return errors
+    except Exception as e:
+        return "Error: " + str(e)
+
+    try:
+        req = urllib2.urlopen(inp)
+    except Exception as e:
+        return "Error: GET %s " % e
+
+    errors = check_response(req.headers)
+
+    if errors:
+        return errors
+
+    text = req.read(maxlen).decode('utf8', 'ignore')
+
+    match = titler.search(text)
+
+    if not match:
+        return "Error: no title "
+
+    rawtitle = match.group(1)
+
+    title = repaste.decode_html(rawtitle)
+    title = " ".join(title.split())
+
+    return u"%s <=> %s" % (title, inp)

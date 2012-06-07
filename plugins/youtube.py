@@ -1,3 +1,4 @@
+# edited and fixed up abit by Red-M on github or Red_M on irc.esper.net
 import locale
 import re
 import time
@@ -17,18 +18,11 @@ video_url = "http://youtube.com/watch?v=%s"
 
 
 def get_video_description(vid_id, input):
-    if perm.isignored(input):
-        return None
-
     j = http.get_json(url % vid_id)
-
     if j.get('error'):
         return
-
     j = j['data']
-
     out = '\x02%s\x02' % j['title']
-
     if not j.get('duration'):
         return out
 
@@ -54,24 +48,24 @@ def get_video_description(vid_id, input):
 
     if 'contentRating' in j:
         out += ' - \x034NSFW\x02'
-
+    if perm.isignored(input):
+        out=""
     return out
+        
 
 
 @hook.regex(*youtube_re)
 def youtube_url(match, bot=None, input=None):
     if "autoreply" in bot.config and not bot.config["autoreply"]:
-        return
-    if not perm.isignored(input):
-        return get_video_description(match.group(1))
-    else:
         return None
+    return get_video_description(match.group(1), input)
 
 @hook.command('y')
 @hook.command
-def youtube(inp, input=None):
+def youtube(inp, input=None, bot=None):
     '.youtube <query> -- returns the first YouTube search result for <query>'
-
+    if '^' in input.paraml[1]:
+        inp = str(inp).replace("^", bot.chanseen[input.conn.server][input.chan][0])
     j = http.get_json(search_api_url, q=inp)
 
     if 'error' in j:

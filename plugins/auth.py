@@ -5,7 +5,7 @@ import hashlib
 
 @hook.command#(owneronly=True)
 def auth(inp, input=None, db_auth=None, bot=None, conn=None):
-    "auth with this bot. NOTE: no password is stored in plain text. all passwords are stored as a md5 hash. usage: ,auth login <username> <password>"
+    "auth with this bot. NOTE: no password is stored in plain text. all passwords are stored as a sha512 hash. usage: ,auth login <username> <password>"
     db_auth.execute("create table if not exists auth(user, pass, groups)")
     db_auth.commit()
     check=input.inp.split(' ')
@@ -31,7 +31,7 @@ def auth(inp, input=None, db_auth=None, bot=None, conn=None):
             usercheck=''.join(str(db_auth.execute("select user from auth where user=(?)",(check[1],)).fetchone()))
             passcheck=''.join(str(db_auth.execute("select pass from auth where user=(?)",(check[1],)).fetchone()))
             groupcheck=''.join(str(db_auth.execute("select groups from auth where user=(?)",(check[1],)).fetchone()))
-            check[2]=hashlib.md5(check[2]).hexdigest()
+            check[2]=hashlib.sha512(check[2]).hexdigest()
             if check[1]==str(usercheck):
                 return("you are already registered on this bot or choose another name.")
             else:
@@ -41,7 +41,7 @@ def auth(inp, input=None, db_auth=None, bot=None, conn=None):
                 return("done. please login by using ,auth login "+check[1]+" <password-here>.")
         if check[0]=="login":
             print(input.nick+" is trying to auth as "+check[1])
-            hashcheck=hashlib.md5(check[2]).hexdigest()
+            hashcheck=hashlib.sha512(check[2]).hexdigest()
             if usercheck==check[1] and passcheck==hashcheck:
                 print(groupcheck)#if groupcheck==None
                 bot.auth[str(conn.server)][groupcheck][str(input.nick)]={}
@@ -61,14 +61,14 @@ def auth(inp, input=None, db_auth=None, bot=None, conn=None):
         if perm.isowner(input) and check[0]=='set' and usercheck==check[1] and check[2]:
             if usercheck==check[1]:
                 db_auth.execute("delete from auth where user=(?)", (check[1],)).rowcount
-                db_auth.execute("insert or replace into auth(user, pass, groups) values (?,?,?)",(check[1], hashlib.md5(check[2]).hexdigest(),groupcheck))
+                db_auth.execute("insert or replace into auth(user, pass, groups) values (?,?,?)",(check[1], hashlib.sha512(check[2]).hexdigest(),groupcheck))
                 db_auth.commit()
                 return("done. reset password.")
             else:
                 return("user not found.")
-        if check[0]=='reset' and usercheck==check[1] and passcheck==hashlib.md5(check[2]).hexdigest() and check[3]:
+        if check[0]=='reset' and usercheck==check[1] and passcheck==hashlib.sha512(check[2]).hexdigest() and check[3]:
             db_auth.execute("delete from auth where user=(?)", (check[1],)).rowcount
-            db_auth.execute("insert or replace into auth(user, pass, groups) values (?,?,?)",(check[1], hashlib.md5(check[3]).hexdigest(),groupcheck))
+            db_auth.execute("insert or replace into auth(user, pass, groups) values (?,?,?)",(check[1], hashlib.sha512(check[3]).hexdigest(),groupcheck))
             db_auth.commit()
             return("done. reset you password.")
     else:

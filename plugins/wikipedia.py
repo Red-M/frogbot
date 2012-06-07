@@ -1,3 +1,4 @@
+# edited and fixed up abit by Red-M on github or Red_M on irc.esper.net
 '''Searches wikipedia and returns first sentence of article
 Scaevolus 2009'''
 
@@ -14,10 +15,11 @@ paren_re = re.compile('\s*\(.*\)$')
 
 @hook.command('w')
 @hook.command
-def wiki(inp):
+def wiki(inp, input=None, bot=None):
     '''.w/.wiki <phrase> -- gets first sentence of wikipedia ''' \
     '''article on <phrase>'''
-
+    if '^' in input.paraml[1]:
+        inp = str(inp).replace("^", bot.chanseen[input.conn.server][input.chan][0])
     x = http.get_xml(search_url, search=inp)
 
     ns = '{http://opensearch.org/searchsuggest2}'

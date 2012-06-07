@@ -7,58 +7,50 @@ def unescape_xml(string):
     return string.replace('&gt;', '>').replace('&lt;', '<').replace('&apos;',
                     "'").replace('&quote;', '"').replace('&amp;', '&')
 
-def get_twitter(inp):
-    url = 'http://twitter.com'
-    text = 'status/text'
-    if re.match(r'^\w{1,15}$', inp):
-        url += '/users/show/%s.xml' % inp
-        screen_name = 'screen_name'
-    tweet = http.get_xml(url)
-    text = unescape_xml(tweet.find(text).text.replace('\n', ''))
-    screen_name = tweet.find(screen_name).text
-    
-    return unicode("%s: %s" % (screen_name, text), errors='replace')
-
 def get_listid(inp,owner):
     url = 'https://api.twitter.com/1/lists/show.json?slug='+str(inp)+'&owner_screen_name='+str(owner)
     try:
         tweet = http.get_json(url)
         text = (''.join(str(tweet["id"])))
     except http.HTTPError, e:
-        errors = {400: 'bad request (ratelimited?)',
-                401: 'tweet is private',
-                403: 'tweet is private',
-                404: 'invalid user/id',
-                500: 'twitter is broken',
-                502: 'twitter is down ("getting upgraded")',
-                503: 'twitter is overloaded (lol, RoR)'}
-        if e.code == 404:
-            return 'error: 404'
-        if e.code in errors:
-            return 'error: ' + errors[e.code]
+        return 'error: '+str(e.code)
     
     return(str(text)) 
+
+def errormatch(inp):
+    matcher='(error)(:)( )(\\d+)'
+    rg = re.compile(matcher,re.IGNORECASE|re.DOTALL)
+    m = rg.search(inp)
+    if m:
+        matches=m.group(1)
+        matches+=m.group(2)
+        matches+=m.group(3)
+        matches+=m.group(4)
+        return matches
+    else:
+        return None
+    
+def get_twitter(inp):
+    try:
+        text = 'status/text'
+        url = 'http://twitter.com/users/show/%s.xml' % inp
+        screen_name = 'screen_name'
+        tweet = http.get_xml(url)
+        text = unescape_xml(tweet.find(text).text.replace('\n', ''))
+        screen_name = tweet.find(screen_name).text
+    except http.HTTPError, e:
+        return 'error: '+str(e.code)
+    return ("@"+str(screen_name)+": "+text.decode('utf-8'))
     
 def get_listtwitter(inp):
-    url = 'http://api.twitter.com/1/lists/statuses.json?list_id=%s' % inp
     try:
+        url = 'http://api.twitter.com/1/lists/statuses.json?list_id=%s' % inp
         tweet = http.get_json(url)
-        text = (''.join(str(tweet[0]["text"].encode("utf8","ignore").replace("\u2026","...")))).replace("\n","")
+        text = unescape_xml(''.join(str(tweet[0]["text"].encode("utf8","replace").replace("\u2026","...").replace("\n",""))))
         screen_name = (''.join(str(tweet[0]["user"]["screen_name"])))
     except http.HTTPError, e:
-        errors = {400: 'bad request (ratelimited?)',
-                401: 'tweet is private',
-                403: 'tweet is private',
-                404: 'invalid user/id',
-                500: 'twitter is broken',
-                502: 'twitter is down ("getting upgraded")',
-                503: 'twitter is overloaded (lol, RoR)'}
-        if e.code == 404:
-            return 'error: 404 '
-        if e.code in errors:
-            return 'error: ' + errors[e.code]
-    
-    return unicode("%s: %s" % (screen_name, text), errors='replace')
+        return 'error: '+str(e.code)
+    return ("@"+str(screen_name)+": "+text.decode('utf-8'))
 
 
 @hook.command("twitterfeed")
@@ -87,7 +79,7 @@ def tfeed(inp, input=None, bot=None, db_twitter=None):
             if lasttweet=='':
                 lasttweet="none."
             #print(lasttweet+"\n"+tweet)
-            if tweet.startswith("error: "):
+            if errormatch(tweet):
                 if tweet.endswith("400"):
                     ttl=ttl+60
                     input.say("I have been rate limited on twitter. This means you ether have too many lists/people beening watched at once please ether make a bigger list or remove some of the people/lists being watched...")
@@ -95,13 +87,14 @@ def tfeed(inp, input=None, bot=None, db_twitter=None):
                 if tweet.endswith("404"):
                     testss= False
                     del bot.twitterlist[feed]
-                    return "feed: "+feed+"returned: Twitter account by the name of "+feed+" not found."
+                    return "feed: '"+feed+"' returned: Twitter account by the name of "+feed+" not found."
                 if tweet.endswith("500") or tweet.endswith("502") or tweet.endswith("503"):
                     testss= False
                     del bot.twitterlist[feed]
-                    return "feed: "+feed+"returned: Twitter is down, being upgraded or overloaded. Try again later...."
+                    return "feed: '"+feed+"' returned: Twitter is down, being upgraded or overloaded. Try again later...."
                 else:
-                    input.say("feed: "+feed+"returned: Unknown error. Something up in here is stuffed....")
+                    input.say("feed: '"+feed+"' returned: '"+lasttweet+"'. Something up in here is stuffed....")
+                    tweet=lasttweet
                     testss= False
             if lasttweet==tweet and not tweet.startswith("error: "):
                 i=i+1
@@ -157,7 +150,7 @@ def tlfeed(inp, input=None, bot=None, db_twitter=None):
             if lasttweet=='':
                 lasttweet="none."
             #print(lasttweet+"\n"+tweet)
-            if tweet.startswith("error: "):
+            if errormatch(tweet):
                 if tweet.endswith("400"):
                     ttl=ttl+60
                     input.say("I have been rate limited on twitter. This means you ether have too many lists/people beening watched at once (the max is 4 without rate limiting from twitter.) please ether make a bigger list or remove some of the people/lists being watched...")
@@ -165,13 +158,14 @@ def tlfeed(inp, input=None, bot=None, db_twitter=None):
                 if tweet.endswith("404"):
                     testss= False
                     del bot.twitterlists[feedname]
-                    return "feed: "+feedname+"returned: Twitter list  by the name of "+feedname+" not found made by "+check[1]+"."
+                    return "feed: "+feedname+" returned: Twitter list  by the name of "+feedname+" not found made by "+check[1]+"."
                 if tweet.endswith("500") or tweet.endswith("502") or tweet.endswith("503"):
                     testss= False
                     del bot.twitterlists[feedname]
-                    return "feed: "+feedname+"returned: Twitter is down, being upgraded or overloaded. Try again later...."
+                    return "feed: "+feedname+" returned: Twitter is down, being upgraded or overloaded. Try again later...."
                 else:
-                    input.say("feed: "+feedname+"returned: Unknown error. Something up in here is stuffed....")
+                    input.say("feed: "+feedname+" returned: '"+lasttweet+"'. Something up in here is stuffed....")
+                    tweet=lasttweet
                     testss= False
             if lasttweet==tweet and not tweet.startswith("error: "):
                 i=i+1

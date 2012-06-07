@@ -23,6 +23,8 @@ def cheval(inp, bot=None, input=None, nick=None, db=None, chan=None):
 	if not perm.isadmin(input):
 		return "Nope.avi"
 	try:
+		if '^' in input.paraml[1]:
+			inp = str(inp).replace("^", bot.chanseen[input.conn.server][input.chan][0])
 		inpss= "input.say(str("+inp+"))"
 		blocked=["sys.stdout",".connect()",'send("quit',"send('quit",'conn.connect()',"bot.conns[",'conf["ftp_pw"]','config["censored_strings"]','conf["server_password"]','conf["nickserv_password"]',"conf['ftp_pw']","config['censored_strings']","conf['server_password']","conf['nickserv_password']"]
 		igncmds=blocked

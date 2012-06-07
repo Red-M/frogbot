@@ -15,7 +15,7 @@ def kl(inp, say=None, nick=None, input=None, bot=None):
         time.sleep(0.1)
         for xcon in bot.conns:
             bot.conns[xcon].send("NICK "+input.conn.nick+"|offline")
-        time.sleep(0.1)
+        time.sleep(0.5)
         for xcon in bot.conns:
             bot.conns[xcon].send('QUIT :\x02\x034,1Kill switch activated by '+input.nick+'.')
         time.sleep(0.1)

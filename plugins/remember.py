@@ -1,15 +1,12 @@
 """
 remember.py: written by Scaevolus 2010, modified by lahwran 2011, modified by Red_M 2012
 """
-
 from util import hook, perm
 import pyexec
 import usertracking
 import re
 import time
-
 defaultchan = "Red_M"  # TODO: creates a security hole, username "default" can alter global factoids
-
 redirect_re = re.compile(r'([|>])\s*(\S*)\s*$|([<])(.*)')
 word_re = re.compile(r'^([+~-]?)(\S+)')
 filter_re = re.compile(r'^\s*[<]([^>]*)[>]\s*(.*)\s*$')
@@ -17,22 +14,17 @@ cmdfilter_re = re.compile(r'^cmd:(.+)$')
 forgotten_re = re.compile(r'^([<]locked[^>]*[>])?[<]forgotten[>].*')
 #args is what is left over after removing these
 maxdepth = 4
-
-
 def db_init(db):
     db.execute("create table if not exists memory(chan, word, data, nick,"
                " primary key(chan, word))")
     db.commit()
 
-
 def get_memory(db, chan, word):
-    row = db.execute("select data from memory where chan=? and word=lower(?)",
-                      (chan, word)).fetchone()
+    row = db.execute("select data from memory where chan=? and word=lower(?)",(chan, word)).fetchone()
     if row:
         return row[0]
     else:
         return None
-
 
 def checkinp(chan, inp, localpm):
     if not inp.split(" ")[0] == "." and (not(chan.startswith('#') and localpm) or not localpm):
@@ -44,7 +36,6 @@ def checkinp(chan, inp, localpm):
     else:
         local = False
     return local, chan, inp.strip()
-
 
 @hook.command
 def no(inp, nick='', chan='', db=None, notice=None, bot=None, modes=None, input=None):
@@ -151,8 +142,7 @@ def forget(inp, chan='', db=None, nick='', notice=None, modes=None, input=None):
         return
     if data and not data.startswith("<forgotten>"):
         db.execute("delete from memory where chan=? and word=lower(?)",(chan, inp))
-        #print "replace into memory(chan, word, data, nick) values (?,lower(?),?,?)", repr((chan, inp, "<forgotten>" + data, nick))
-        #db.execute("delete from memory where chan=? and word=lower(?)",(chan, inp))
+        print "replace into memory(chan, word, data, nick) values (?,lower(?),?,?)", repr((chan, inp, "<forgotten>" + data, nick))
         db.commit()
         notice(("[local]" if local else "") + ('forgot `%s`' % data.replace('`', "'")))
     elif data:
@@ -220,10 +210,11 @@ def mem(inp, chan='', db=None, nick='', notice=None, user='', host='', bot=None,
         return "arguments reqired"
 
 
+
 @hook.regex(r'^[?!](.+)')  # groups: (mode,word,args,redirectmode,redirectto)
+@hook.regex(r'^([^ ]+)[:,] (.+)')  # groups: (mode,word,args,redirectmode,redirectto)
 def question(inp, chan='', say=None, db=None, input=None, nick="", me=None, bot=None, notice=None):
-    "!?factoid -- shows what data is associated with word"
-    inuserhost = input.user+'@'+input.host
+    "!factoid -- shows what data is associated with word"
     filterhistory = []  # loop detection, maximum recursion depth(s)
 
     def varreplace(orig, variables):
@@ -251,6 +242,8 @@ def question(inp, chan='', say=None, db=None, input=None, nick="", me=None, bot=
                 return varreplace(filterinp, variables)
             elif filtername == "action":
                 return (varreplace(filterinp, variables), me)
+            elif filtername == "notice":
+                return (filters([filterinp, setternick], variables, filterhistory), notice)
             elif filtername == "noreply":
                 return ""
             elif len(filtername) == 3 and filtername.startswith("no"):
@@ -259,11 +252,10 @@ def question(inp, chan='', say=None, db=None, input=None, nick="", me=None, bot=
 		else:
 		    filterhistory.remove(orig)
 		    return filters([filterinp, setternick], variables, filterhistory)
-            elif filtername == "pyexec" and perm.isadmin(input):
+            elif filtername == "pyexec":
                 preargs = ""
                 for i in variables.keys():
                     preargs += i + "=" + repr(unicode(variables[i]).encode('utf8')) + ";"
-                #print "\n"+preargs+"\n" + filterinp+"\n"
                 return filters([pyexec.python(preargs + filterinp), setternick], variables, filterhistory)
             elif filtername.startswith("locked"):
 		filterhistory.remove(orig)
@@ -272,12 +264,12 @@ def question(inp, chan='', say=None, db=None, input=None, nick="", me=None, bot=
             if cmd:
                 trigger = cmd.group(1).lower()
                 cmdfunc, cmdargs = bot.commands[trigger]
-                if trigger in ["no", "remember", "forget", "unforget", "python", "ply", "cheval", "checkvalue"]:
-                    return "Nope.avi"
+                if trigger in ["no", "remember", "forget", "unforget", "python"]:
+                    return "I'm sorry, I can't let you do that, dave"
                 outputlines = []
 
                 def cmdsay(o):
-                    #print "cmdsay out:", repr(o)
+                    print "cmdsay out:", repr(o)
                     if filter_re.search(o):
                         outputlines.append(o)
                     else:
@@ -286,15 +278,16 @@ def question(inp, chan='', say=None, db=None, input=None, nick="", me=None, bot=
                 def cmdme(o):
                     outputlines.append("<action>" + o)
 
-                newinput = (input.conn, input.raw, input.prefix, input.command, input.params,
+                newinput = bot.Input(input.conn, input.raw, input.prefix, input.command, input.params,
                     setternick, "user", "host", input.paraml, input.msg)
-                #newinput.say = cmdsay
-                #newinput.reply = cmdsay
-                #newinput.me = cmdme
-                #newinput.inp = varreplace(filterinp, variables)
-                #newinput.trigger = trigger
-                input.say(newinput, "command", cmdfunc, cmdargs, autohelp=False)
-                time.sleep(3.5)  # WRONG.. but meh
+                newinput.say = cmdsay
+                newinput.reply = cmdsay
+                newinput.me = cmdme
+                newinput.inp = varreplace(filterinp, variables)
+                newinput.trigger = trigger
+                mutex = bot.dispatch(newinput, "command", cmdfunc, cmdargs, autohelp=False)
+                mutex.acquire()
+                mutex.release()
                 outputlines = [filters([line, setternick], variables, filterhistory) for line in outputlines]
                 return outputlines
         else:
@@ -314,9 +307,14 @@ def question(inp, chan='', say=None, db=None, input=None, nick="", me=None, bot=
     db_init(db)
     whole = False
 
-    def splitgroups(inp):
+    groups = inp.groups()
+    if len(groups) == 2:
+        if groups[0] == input.conn.nick and (not "command_handled" in input or not input.command_handled):
+            groups = [groups[1]]
+        else:
+            return
+    def splitgroups(words):
         "returns (mode, word, args, redir, redirto)"
-        words = inp.group(1)
         ret = []
         wordmatch = word_re.search(words)
         words = words[wordmatch.end():]
@@ -335,7 +333,10 @@ def question(inp, chan='', say=None, db=None, input=None, nick="", me=None, bot=
         ret.append(redirectto)
         return ret
 
-    (mode, word, args, redir, redirto) = splitgroups(inp)
+    (mode, word, args, redir, redirto) = splitgroups(groups[0])
+    if "/" in word:
+        return
+
 
     def finaloutput(s, redir, redirto, input, special=None):
         if not s:
@@ -370,6 +371,8 @@ def question(inp, chan='', say=None, db=None, input=None, nick="", me=None, bot=
                  "inp": args or "",
 		 "ioru": args or nick,
                  "word": word or ""}
+    if "^" in str(variables["inp"]):
+        variables["inp"]=str(variables["inp"]).replace("^",bot.chanseen[input.conn.server][input.chan][0])
     if mode == "-":   # information
         message = word + " is "
         local = db.execute("select nick from memory where chan=? and word=lower(?)", (chan, word)).fetchone()

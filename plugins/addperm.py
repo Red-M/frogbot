@@ -2,91 +2,148 @@
 from util import hook, perm, munge
 import json
 
-@hook.command("addadmin")
+@hook.command("perm")
 @hook.command
-def aad(inp, bot=None, input=None):
-	"adds a nick/host to the admin list..."
-	if perm.issuperadmin(input) and input.conn.conf["admins"].count(inp)==0:
-		input.conn.conf["admins"].append(inp)
-		confofall=bot.config
-		for xcon in bot.conns:
-			confofall['connections'][xcon]=bot.conns[xcon].conf
-		json.dump(confofall, open('config', 'w'), sort_keys=True, indent=1)
-		return"Done."
-	else:
-		return"already an admin..."
-
-@hook.command("removeadmin")
-@hook.command
-def ard(inp, bot=None, input=None):
-	"removes a nick/host from the admin list..."
-	if perm.issuperadmin(input) and input.conn.conf["admins"].count(inp)>=1:
-		input.conn.conf["admins"].remove(inp)
-		confofall=bot.config
-		for xcon in bot.conns:
-			confofall['connections'][xcon]=bot.conns[xcon].conf
-		json.dump(confofall, open('config', 'w'), sort_keys=True, indent=1)
-		return"Done."
-	else:
-		input.say("not an admin...")
+def permissions(inp, input=None, bot=None):
+	check = input.inp.split(" ")
+	cmdlist = ["add","remove","list","help"]
+	check[0]=check[0].lower()
+	check[1]=check[1].lower()
+	if check[0] in cmdlist:
+		if check[0]=="list" and len(check)==2:
+			listlist=["bot","admins","superadmins","owner"]
+			if check[1]=="bots":
+				rep = listbots(bot,input)
+			if check[1]=="admins":
+				rep = listadmins(bot,input)
+			if check[1]=="superadmins":
+				rep = listsuperadmins(bot,input)
+			if check[1]=="owner":
+				rep = listowner(bot,input)
+			elif not (check[1] in listlist):
+				rep = ("error. unknown error or not a permissions group.")
+		if len(check)==3:
+			if perm.isadmin(input):
+				if check[0]=="add" and check[1]=="bot" and input.conn.conf["bots"].count(check[2])==0:
+					rep = addbot(check[2],bot,input)
+				if check[0]=="remove" and check[1]=="bot" and input.conn.conf["bots"].count(check[2])==1:
+					rep = removebot(check[2],bot,input)
+			if perm.issuperadmin(input):
+				if check[0]=="add":
+					if check[1]=="admin" and input.conn.conf["admins"].count(check[2])==0:
+						rep = addadmin(check[2], bot, input)
+					if check[1]=="bot" and input.conn.conf["bots"].count(check[2])==0:
+						rep = addbot(check[2],bot,input)
+					elif check[1]=="bot" or check[1]=="admin":
+						rep = ("error. unknown error or already a "+check[1])
+				if check[0]=="remove":
+					if check[1]=="admin" and input.conn.conf["admins"].count(check[2])==1:
+						rep = removeadmin(check[2],bot,input)
+					if check[1]=="bot" and input.conn.conf["bots"].count(check[2])==1:
+						rep = removebot(check[2],bot,input)
+					elif check[1]=="bot" or check[1]=="admin":
+						rep = ("error. unknown error or not a "+check[1])
+			if perm.isowner(input):
+				if check[0]=="add":
+					if check[1]=="admin" and input.conn.conf["admins"].count(check[2])==0:
+						rep = addadmin(check[2], bot, input)
+					if check[1]=="superadmin" and input.conn.conf["superadmins"].count(check[2])==0:
+						rep = addsuperadmin(check[2], bot, input)
+					if check[1]=="bot" and input.conn.conf["bots"].count(check[2])==0:
+						rep = addbot(check[2],bot,input)
+					elif check[1]=="bot" or check[1]=="admin":
+						rep = ("error. unknown error or already a "+check[1])
+				if check[0]=="remove" and perm.isowner(input):
+					if check[1]=="admin" and input.conn.conf["admins"].count(check[2])==1:
+						rep = removeadmin(check[2],bot,input)
+					if check[1]=="superadmin" and input.conn.conf["superadmins"].count(check[2])==1:
+						rep = removesuperadmin(check[2],bot,input)
+					if check[1]=="bot" and input.conn.conf["bots"].count(check[2])==1:
+						rep = removebot(check[2],bot,input)
+					elif check[1]=="bot" or check[1]=="admin":
+						rep = ("error. unknown error or not a "+check[1])
+			elif not perm.isadmin(input):
+				rep = ("You are not an admin or not high enough in this bot's permission's system to do this.")
+		if check[0]=="help":
+			rep = " proper use of ,perm is: ,perm <add/remove|list> <bot/admin/superadmin|bots/admins/superadmins> [nick or host to add/remove from the admin/superadmin/bot list] where things in <> are required and [] are optional depending on the wether or not you are adding/removing or listing a group and where / is one of these and | is one or the other."
+		elif not ((check[0]=="list" and len(check)==2) or (len(check)==3)):
+			rep = ("error. unknown error or not a valid use for this command. proper use: ,perm <add/remove|list> <bot/admin/superadmin|bots/admins/superadmins> [nick or host to add/remove from the admin/superadmin/bot list] where things in <> are required and [] are optional depending on the wether or not you are adding/removing or listing a group and where / is one of these and | is one or the other.")
+	elif not check[0] in cmdlist:
+		rep = ("error. unknown error or not a valid use for this command. proper use: ,perm <add/remove|list> <bot/admin/superadmin|bots/admins/superadmins> [nick or host to add/remove from the admin/superadmin/bot list] where things in <> are required and [] are optional depending on the wether or not you are adding/removing or listing a group and where / is one of these and | is one or the other.")
+	return rep
 		
+def addadmin(inp, bot, input):
+	input.conn.conf["admins"].append(inp)
+	confofall=bot.config
+	for xcon in bot.conns:
+		confofall['connections'][xcon]=bot.conns[xcon].conf
+	json.dump(confofall, open('config', 'w'), sort_keys=True, indent=1)
+	return"Done."
 
-@hook.command("addbot")
-@hook.command
-def aab(inp, bot=None, input=None):
-	"adds a nick/host to the bots list..."
-	if perm.isadmin(input) and input.conn.conf["bots"].count(inp)==0:
-		input.conn.conf["bots"].append(inp)
-		confofall=bot.config
-		for xcon in bot.conns:
-			confofall['connections'][xcon]=bot.conns[xcon].conf
-		json.dump(confofall, open('config', 'w'), sort_keys=True, indent=1)
-		return"Done."
-	else:
-		return"already on bot list..."
+def removeadmin(inp, bot, input):
+	input.conn.conf["admins"].remove(inp)
+	confofall=bot.config
+	for xcon in bot.conns:
+		confofall['connections'][xcon]=bot.conns[xcon].conf
+	json.dump(confofall, open('config', 'w'), sort_keys=True, indent=1)
+	return"Done."
 
-@hook.command("removebot")
-@hook.command
-def arb(inp, bot=None, input=None):
-	"removes a nick/host from the bots list..."
-	if perm.isadmin(input) and input.conn.conf["bots"].count(inp)>=1:
-		input.conn.conf["bots"].remove(inp)
-		confofall=bot.config
-		for xcon in bot.conns:
-			confofall['connections'][xcon]=bot.conns[xcon].conf
-		json.dump(confofall, open('config', 'w'), sort_keys=True, indent=1)
-		return"Done."
-	else:
-		input.say("not a bot...")
+def addbot(inp, bot, input):
+	input.conn.conf["bots"].append(inp)
+	confofall=bot.config
+	for xcon in bot.conns:
+		confofall['connections'][xcon]=bot.conns[xcon].conf
+	json.dump(confofall, open('config', 'w'), sort_keys=True, indent=1)
+	return"Done."
 
+def removebot(inp, bot, input):
+	input.conn.conf["bots"].remove(inp)
+	confofall=bot.config
+	for xcon in bot.conns:
+		confofall['connections'][xcon]=bot.conns[xcon].conf
+	json.dump(confofall, open('config', 'w'), sort_keys=True, indent=1)
+	return"Done."
 
-@hook.command("addsuperadmin")
-@hook.command
-def asa(inp, bot=None, input=None):
-	"adds a nick/host to the super amdin list..."
-	if perm.isowner(input) and input.conn.conf["superadmins"].count(inp)==0:
-		input.conn.conf["superadmins"].append(inp)
-		confofall=bot.config
-		for xcon in bot.conns:
-			confofall['connections'][xcon]=bot.conns[xcon].conf
-		json.dump(confofall, open('config', 'w'), sort_keys=True, indent=1)
-		return"Done."
-	else:
-		return"already a super admin..."
+def addsuperadmin(inp, bot, input):
+	input.conn.conf["superadmins"].append(inp)
+	confofall=bot.config
+	for xcon in bot.conns:
+		confofall['connections'][xcon]=bot.conns[xcon].conf
+	json.dump(confofall, open('config', 'w'), sort_keys=True, indent=1)
+	return"Done."
 
-@hook.command("removesuperadmin")
-@hook.command
-def arsa(inp, bot=None, input=None):
-	"removes a nick/host from the super amdin list..."
-	if perm.isowner(input) and input.conn.conf["superadmins"].count(inp)==1:
+def removesuperadmin(inp, bot, input):
 		input.conn.conf["superadmins"].remove(inp)
 		confofall=bot.config
 		for xcon in bot.conns:
 			confofall['connections'][xcon]=bot.conns[xcon].conf
 		json.dump(confofall, open('config', 'w'), sort_keys=True, indent=1)
 		return"Done."
+
+def listbots(bot, input):
+	outrs=', '.join(input.conn.conf["bots"])
+	if outrs=='':
+		return("I am currently ignoring not one single bot!")
 	else:
-		return"not a super admin..."
+		return("I am currently ignoring these bots \x02"+outrs+"\x02.")
+
+def listadmins(bot, input):
+	outos=', '.join(input.conn.conf["admins"])
+	outos=munge.muninput(input, bot, outos)
+	return("The Admins of this bot are: \x02"+outos)
+#	input.conn.send("PRIVMSG "+ input.chan +" :The Admins of this bot are: \x02\x034,1"+outos)
+
+def listsuperadmins(bot, input):
+	outos=', '.join(input.conn.conf["superadmins"])
+	outos=munge.muninput(input, bot, outos)
+	return("The Super Admins of this bot are: \x02"+outos)
+#	input.conn.send("PRIVMSG "+ input.chan +" :The Admins of this bot are: \x02\x034,1"+outos)
+
+def listowner(bot, input):
+	outos=', '.join(input.conn.conf["owner"])
+	outos=munge.muninput(input, bot, outos)
+	return("The Owner of this bot is: \x02"+outos)
+#	input.conn.send("PRIVMSG "+ input.chan +" :The Owner of this bot is: \x02\x034,1"+outos)
 
 @hook.command("stfu")
 @hook.command
@@ -138,23 +195,6 @@ def listen(inp, bot=None, input=None):
 		else:
 			return("invalid syntax. ,listen <channel or nick to be listened to>")
 
-@hook.command("botlist")
-@hook.command
-def bol(inp, bot=None, input=None):
-	"lists the currently ignored bots on the bot list..."
-	outrs=', '.join(input.conn.conf["bots"])
-	if outrs=='':
-		input.say("I am currently ignoring not one single bot!")
-	else:
-		if inp=='':
-			#input.say("I am currently ignoring these bots \x02\x034,1"+outrs+"\x02\x031,0.")
-			input.say("I am currently ignoring these bots \x02"+outrs+"\x02.")
-		else: 
-			if input.conn.conf["bot"].count(inp)==1:
-				input.say("I am ignoring this bot...")
-			else:
-				input.say("I do not have that bot on my bot list...")
-		
 @hook.command("pokerface")
 @hook.command("ignorelist")
 @hook.command
@@ -172,33 +212,6 @@ def ign(inp, bot=None, input=None):
 				input.say("I am ignoring this person...")
 			else:
 				input.say("I do not have that person on my ignore list...")
-
-@hook.command("adm")
-@hook.command
-def admins(inp, bot=None, input=None):
-	"tells the current admins of the bot..."
-	outos=', '.join(input.conn.conf["admins"])
-	outos=munge.muninput(input, bot, outos)
-	input.conn.send("PRIVMSG "+ input.chan +" :The Admins of this bot are: \x02"+outos)
-#	input.conn.send("PRIVMSG "+ input.chan +" :The Admins of this bot are: \x02\x034,1"+outos)
-
-@hook.command("sadm")
-@hook.command
-def superadmins(inp, bot=None, input=None):
-	"tells the current admins of the bot..."
-	outos=', '.join(input.conn.conf["superadmins"])
-	outos=munge.muninput(input, bot, outos)
-	input.conn.send("PRIVMSG "+ input.chan +" :The Super Admins of this bot are: \x02"+outos)
-#	input.conn.send("PRIVMSG "+ input.chan +" :The Admins of this bot are: \x02\x034,1"+outos)
-
-@hook.command("own")
-@hook.command
-def owner(inp, bot=None, input=None):
-	"tells the current admins of the bot..."
-	outos=', '.join(input.conn.conf["owner"])
-	outos=munge.muninput(input, bot, outos)
-	input.conn.send("PRIVMSG "+ input.chan +" :The Owner of this bot is: \x02"+outos)
-#	input.conn.send("PRIVMSG "+ input.chan +" :The Owner of this bot is: \x02\x034,1"+outos)
 
 @hook.command
 def gtfo(inp, input=None, bot=None):

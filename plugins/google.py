@@ -7,7 +7,8 @@ from util import http
 @hook.command
 def googleimage(inp):
     ".gis <term> -- Returns first Google Image result (Safesearch off)."
-
+    if '^' in inp:
+        inp = str(inp).replace("^", bot.chanseen[input.conn.server][input.chan][0])
     url = 'http://ajax.googleapis.com/ajax/services/search/images?q='+str(inp).replace(" ","%20")+'&v=1.0&safe=off'
     parsed = http.get_json(url)
     if not 200 <= parsed['responseStatus'] < 300:

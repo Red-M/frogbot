@@ -2,8 +2,8 @@ from util import hook
 
 
 def db_init(db):
-    db_users.execute("create table if not exists botmodes(modename, nick, user, host, authed, admin, channel, chanmodes, usermodes)")
-    db_users.commit()
+    db.execute("create table if not exists botmodes(modename, nick, user, host, authed, admin, channel, chanmodes, usermodes)")
+    db.commit()
 
 
 class Checker(object):
@@ -41,7 +41,7 @@ class Checker(object):
         else:
             checks.append("")
 
-        return bool(query(db_users, checks).fetchone())
+        return bool(query(db, checks).fetchone())
 
 
 def query(db, checks):
@@ -82,12 +82,12 @@ def valueadd(bot, input, func, kind, args):
 
 
 @hook.command
-def modeset(inp, input=None, db_users=None):
+def modeset(inp, input=None, db=None):
     ".mode - set modes on things. admin only."
     if input.nick not in input.bot.config["admins"]:
         input.notice("only bot admins can use this command, sorry")
         return
-    db_init(db_users)
+    db_init(db)
     split = inp.split(" ")
     print((repr(split)))
     if split[0] in ["set", "del"]:
@@ -106,9 +106,9 @@ def modeset(inp, input=None, db_users=None):
     sqlargs = [names[i] for i in namemap]
     if split[0] in ["query", "search"]:
         if split[0] == "query":
-            result = query(db_users, sqlargs).fetchall()
+            result = query(db, sqlargs).fetchall()
         else:
-            result = posquery(db_users, sqlargs).fetchall()
+            result = posquery(db, sqlargs).fetchall()
         names["limit"] = int(names["limit"])
         if not len(result):
             input.notice("no results")
@@ -131,10 +131,10 @@ def modeset(inp, input=None, db_users=None):
         if "".join(sqlargs[1:]) == "*******" and ("iamsure" not in names or names["iamsure"] != "yes"):
             input.notice("you're trying to set a mode on everything. please repeat with 'iamsure=yes' on the query to confirm.")
             return
-        db_users.execute("insert into botmodes(modename, nick, user, host, authed, admin, channel, chanmodes, usermodes) values(?, ?, ?, ?, ?, ?, ?, ?, ?)", sqlargs)
-        db_users.commit()
+        db.execute("insert into botmodes(modename, nick, user, host, authed, admin, channel, chanmodes, usermodes) values(?, ?, ?, ?, ?, ?, ?, ?, ?)", sqlargs)
+        db.commit()
         input.notice("done.")
     elif split[0] == "del":
-        db_users.execute("delete from botmodes where modename=? and nick=? and user=? and host=? and authed=? and admin=? and channel=? and chanmodes=? and usermodes=?", sqlargs)
-        db_users.commit()
+        db.execute("delete from botmodes where modename=? and nick=? and user=? and host=? and authed=? and admin=? and channel=? and chanmodes=? and usermodes=?", sqlargs)
+        db.commit()
         input.notice("done.")

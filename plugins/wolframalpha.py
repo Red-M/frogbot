@@ -1,3 +1,4 @@
+# edited and fixed up abit by Red-M on github or Red_M on irc.esper.net
 import re
 
 from util import hook, http
@@ -5,13 +6,14 @@ from util import hook, http
 
 @hook.command('wa')
 @hook.command
-def wolframalpha(inp, bot=None):
+def wolframalpha(inp, bot=None, input=None):
     ".wa <query> -- Computes <query> using Wolfram Alpha."
 
     api_key = bot.config.get("api_keys", {}).get("wolframalpha", None)
     if api_key is None:
         return "error: no api key set"
-
+    if '^' in input.paraml[1]:
+        inp = str(inp).replace("^", bot.chanseen[input.conn.server][input.chan][0])
     url = 'http://api.wolframalpha.com/v2/query?format=plaintext'
 
     result = http.get_xml(url, input=inp, appid=api_key)

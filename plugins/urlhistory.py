@@ -1,6 +1,7 @@
 import math
 import re
 import time
+import munge
 
 from util import hook, urlnorm, timesince
 
@@ -33,10 +34,7 @@ def get_history(db, chan, url):
 
 def nicklist(nicks):
     nicks = sorted(dict(nicks), key=unicode.lower)
-    for i in range(len(nicks)):
-        l = list(nicks[i])
-    l[0] = "_"
-    nicks[i] = "".join(l)
+    nicks = [munge.munge(nick) for nick in nicks]
     if len(nicks) <= 2:
         return ' and '.join(nicks)
     else:
@@ -51,18 +49,17 @@ def format_reply(history):
     last_time = timesince.timesince(recent_time)
 
     if len(history) == 1:
-        return "%s linked that %s ago." % (last_nick, last_time)
+        return "%s linked that %s ago." % (munge.mune(last_nick), last_time)
 
     hour_span = math.ceil((time.time() - history[-1][1]) / 3600)
     hour_span = '%.0f hours' % hour_span if hour_span > 1 else 'hour'
 
     hlen = len(history)
     ordinal = ["once", "twice", "%d times" % hlen][min(hlen, 3) - 1]
-    last_nick = "_" + last_nick[1:]
     if len(dict(history)) == 1:
         last = "last linked %s ago" % last_time
     else:
-        last = "last linked by %s %s ago" % (last_nick, last_time)
+        last = "last linked by %s %s ago" % (munge.munge(last_nick), last_time)
 
     return "that url has been posted %s in the past %s by %s (%s)." % (ordinal,
             hour_span, nicklist(history), last)

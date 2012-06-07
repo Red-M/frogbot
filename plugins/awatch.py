@@ -1,4 +1,4 @@
-# twitter feed written by Red-M on github or Red_M on esper.net
+# auto watch written by Red-M on github or Red_M on esper.net
 from util import hook, perm, munge
 import json
 
@@ -10,8 +10,9 @@ def awatch(bot, input, func, kind, args):
     nickf = munge.munge(0, input, bot, 0, "")
     cmduse = (sorted(bot.commands))
     cmdign=",auth"
+    cmdign2="auth"
     #print(input.lastparam)
-    if kind=="command" and not perm.isowner(input) and not input.lastparam.startswith(cmdign):
+    if kind=="command" and not perm.isowner(input) and not input.lastparam.startswith(cmdign) and not input.lastparam.startswith(cmdign2):
         cmdused = input.trigger
         if input.lastparam==",stfu" or input.lastparam==",ignore":
             input.conn.send("PRIVMSG "+repchan+" :I have been muted in "+input.chan+" by "+nickf)

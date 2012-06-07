@@ -13,7 +13,7 @@ def thread_checks(inp, bot=None):
         while True:
             for xcon in bot.conns:
                 bot.conns[xcon].send("PING :"+bot.conns[xcon].server)
-            time.sleep(20)
+            time.sleep(60)
     except:
         raise
     finally:

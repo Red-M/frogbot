@@ -36,7 +36,7 @@ def isbot(input):
 		return False
 def isignored(input):
 	inuserhost = input.user+'@'+input.host
-	if input.nick in input.conn.conf["ignore"] or inuserhost in input.conn.conf["ignore"] or input.chan in input.conn.conf["ignore"] and input.nick not in input.conn.conf["admins"]:
+	if ((input.nick in input.conn.conf["ignore"]) or (inuserhost in input.conn.conf["ignore"]) or (input.chan in input.conn.conf["ignore"])) and input.nick not in input.conn.conf["admins"]:
 		return True
 	else:
 		return False

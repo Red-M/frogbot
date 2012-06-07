@@ -62,6 +62,8 @@ def run(func, input):
             input.db_auth = get_db_connection_auth()
         if 'db_twitter' in args and 'db_twitter' not in input:
             input.db_twitter = get_db_connection_twitter()
+        if 'db_seen' in args and 'db_seen' not in input:
+            input.db_seen = get_db_connection_seen()
         if 'input' in args:
             input.input = input
         if 0 in args:
