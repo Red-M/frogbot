@@ -113,12 +113,12 @@ def addsuperadmin(inp, bot, input):
 	return"Done."
 
 def removesuperadmin(inp, bot, input):
-		input.conn.conf["superadmins"].remove(inp)
-		confofall=bot.config
-		for xcon in bot.conns:
-			confofall['connections'][xcon]=bot.conns[xcon].conf
-		json.dump(confofall, open('config', 'w'), sort_keys=True, indent=1)
-		return"Done."
+	input.conn.conf["superadmins"].remove(inp)
+	confofall=bot.config
+	for xcon in bot.conns:
+		confofall['connections'][xcon]=bot.conns[xcon].conf
+	json.dump(confofall, open('config', 'w'), sort_keys=True, indent=1)
+	return"Done."
 
 def listbots(bot, input):
 	outrs=', '.join(input.conn.conf["bots"])
