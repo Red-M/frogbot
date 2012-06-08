@@ -7,8 +7,12 @@ import json
 def permissions(inp, input=None, bot=None):
 	check = input.inp.split(" ")
 	cmdlist = ["add","remove","list","help"]
-	check[0]=check[0].lower()
-	check[1]=check[1].lower()
+	if len(check)>=1:
+		check[0]=check[0].lower()
+	if len(check)>=2:
+		check[1]=check[1].lower()
+	if len(check)==0:
+		return("Try using ',perm help' before stuffing around with this command.")
 	if check[0] in cmdlist:
 		if check[0]=="list" and len(check)==2:
 			listlist=["bot","admins","superadmins","owner"]
@@ -23,6 +27,7 @@ def permissions(inp, input=None, bot=None):
 			elif not (check[1] in listlist):
 				rep = ("error. unknown error or not a permissions group.")
 		if len(check)==3:
+			check[1]=check[1].lower()
 			if perm.isadmin(input):
 				if check[0]=="add" and check[1]=="bot" and input.conn.conf["bots"].count(check[2])==0:
 					rep = addbot(check[2],bot,input)
@@ -65,11 +70,14 @@ def permissions(inp, input=None, bot=None):
 			elif not perm.isadmin(input):
 				rep = ("You are not an admin or not high enough in this bot's permission's system to do this.")
 		if check[0]=="help":
-			rep = " proper use of ,perm is: ,perm <add/remove|list> <bot/admin/superadmin|bots/admins/superadmins> [nick or host to add/remove from the admin/superadmin/bot list] where things in <> are required and [] are optional depending on the wether or not you are adding/removing or listing a group and where / is one of these and | is one or the other."
+			rep = ""
+			input.conn.send("PRIVMSG "+input.nick+" :Proper use of ,perm is: ,perm <add/remove|list> <bot/admin/superadmin|bots/admins/superadmins> [nick or host to add/remove from the admin/superadmin/bot list] where things in <> are required and [] are optional depending on the wether or not you are adding/removing or listing a group and where / is one of these and | is one or the other.")
 		elif not ((check[0]=="list" and len(check)==2) or (len(check)==3)):
-			rep = ("error. unknown error or not a valid use for this command. proper use: ,perm <add/remove|list> <bot/admin/superadmin|bots/admins/superadmins> [nick or host to add/remove from the admin/superadmin/bot list] where things in <> are required and [] are optional depending on the wether or not you are adding/removing or listing a group and where / is one of these and | is one or the other.")
+			input.conn.send("error. unknown error or not a valid use for this command. proper use: ,perm <add/remove|list> <bot/admin/superadmin|bots/admins/superadmins> [nick or host to add/remove from the admin/superadmin/bot list] where things in <> are required and [] are optional depending on the wether or not you are adding/removing or listing a group and where / is one of these and | is one or the other.")
+			rep = ""
 	elif not check[0] in cmdlist:
-		rep = ("error. unknown error or not a valid use for this command. proper use: ,perm <add/remove|list> <bot/admin/superadmin|bots/admins/superadmins> [nick or host to add/remove from the admin/superadmin/bot list] where things in <> are required and [] are optional depending on the wether or not you are adding/removing or listing a group and where / is one of these and | is one or the other.")
+		rep = "" 
+		input.conn.send("error. unknown error or not a valid use for this command. proper use: ,perm <add/remove|list> <bot/admin/superadmin|bots/admins/superadmins> [nick or host to add/remove from the admin/superadmin/bot list] where things in <> are required and [] are optional depending on the wether or not you are adding/removing or listing a group and where / is one of these and | is one or the other.")
 	return rep
 		
 def addadmin(inp, bot, input):

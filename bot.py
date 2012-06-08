@@ -14,6 +14,7 @@ import sys
 import time
 
 sys.path += ['plugins']  # so 'import hook' works without duplication
+sys.path += ['core']  # so 'import IRC' works without duplication
 sys.path += ['lib']
 os.chdir(sys.path[0] or '.')  # do stuff relative to the install directory
 
@@ -47,7 +48,8 @@ bot.chanseen = {}
 bot.twitterlist = {}
 bot.twitterlists = {}
 bot.connected={}
-bot.test=""
+bot.test={}
+bot.html=0
 
 try:
     for name, conf in bot.config['connections'].iteritems():

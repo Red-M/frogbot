@@ -140,8 +140,8 @@ def forget(inp, chan='', db=None, nick='', notice=None, modes=None, input=None):
     if data and data.startswith("<locked") and (not(perm.isadmin(input))):
         notice(("[local]" if local else "") + "that factoid is locked.")
         return
-    if data and not data.startswith("<forgotten>"):
-        db.execute("delete from memory where chan=? and word=lower(?)",(chan, inp))
+    if data and not data.startswith("<forgotten>") and perm.isadmin(input):
+        db.execute("replace into memory(chan, word, data, nick) values (?,lower(?),?,?)",(chan, inp, "<forgotten>" + data, nick))
         print "replace into memory(chan, word, data, nick) values (?,lower(?),?,?)", repr((chan, inp, "<forgotten>" + data, nick))
         db.commit()
         notice(("[local]" if local else "") + ('forgot `%s`' % data.replace('`', "'")))
@@ -371,7 +371,8 @@ def question(inp, chan='', say=None, db=None, input=None, nick="", me=None, bot=
                  "inp": args or "",
 		 "ioru": args or nick,
                  "word": word or ""}
-    if "^" in str(variables["inp"]):
+    variables["inp"] = unicode(variables["inp"])
+    if "^" in (variables["inp"]):
         variables["inp"]=str(variables["inp"]).replace("^",bot.chanseen[input.conn.server][input.chan][0])
     if mode == "-":   # information
         message = word + " is "
