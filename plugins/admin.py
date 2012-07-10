@@ -6,7 +6,8 @@ from util import hook, perm
 import json
 
 # Added to make the move to a new auth system a lot easier
-# Improved to account for frog's permissions system and moved the improvement to plugins/util/perm.py
+# Improved to account for frog's permissions system and moved
+# the improvement to plugins/util/perm.py
 
 @hook.command
 def join(inp, input=None, db=None, notice=None, bot=None):
@@ -14,8 +15,8 @@ def join(inp, input=None, db=None, notice=None, bot=None):
     if not perm.isadmin(input):
         notice("Only bot admins can use this command!")
         return
-    notice("Attempting to join " + inp + "...")
-    input.conn.send("JOIN " + inp)
+    notice("Attempting to join %s..." % (inp))
+    input.conn.send("JOIN %s" % (inp))
     if input.conn.conf['channels'].count(inp)==0:
         input.conn.conf['channels'].append(inp)
         json.dump(bot.config, open('config', 'w'), sort_keys=True, indent=1)
@@ -27,9 +28,9 @@ def cycle(inp, input=None, db=None, notice=None):
     if not perm.isadmin(input):
         notice("Only bot admins can use this command!")
         return
-    notice("Attempting to cycle " + inp + "...")
-    input.conn.send("PART " + inp)
-    input.conn.send("JOIN " + inp)
+    notice("Attempting to cycle %s..." % (inp))
+    input.conn.send("PART %s" % (inp))
+    input.conn.send("JOIN " % (inp))
 
 @hook.command
 def part(inp, input=None, notice=None, bot=None):
@@ -37,8 +38,8 @@ def part(inp, input=None, notice=None, bot=None):
     if not perm.isadmin(input):
         notice("Only bot admins can use this command!")
         return
-    notice("Attempting to part from " + inp + "...")
-    input.conn.send("PART " + inp)
+    notice("Attempting to part from %s..."  % (inp))
+    input.conn.send("PART %s" % (inp))
     if input.conn.conf['channels'].count(inp)==1:
         input.conn.conf['channels'].remove(inp)
         json.dump(bot.config, open('config', 'w'), sort_keys=True, indent=1)
@@ -50,8 +51,8 @@ def nick(inp, input=None, notice=None):
     if not perm.isowner(input):
         notice("Only the bot owner can use this command!")
         return
-    notice("Changing nick to " + inp + ".")
-    input.conn.send("NICK " + inp)
+    notice("Changing nick to %s."  % (inp))
+    input.conn.send("NICK %s" % (inp))
 
 @hook.command
 def kick(inp, input=None, notice=None):
@@ -69,7 +70,7 @@ def kick(inp, input=None, notice=None):
             for x in split[2:]:
                 reason = reason + x + " "
             reason = reason[:-1]
-            out = out+" :"+reason
+            out = "%s :%s" % (out,reason)
     else:
         chan = input.chan
         user = split[0]
@@ -77,16 +78,18 @@ def kick(inp, input=None, notice=None):
         if len(split) > 1:
             reason = ""
             for x in split[1:]:
-                reason = reason + x + " "
+                reason =  "%s%s " % (reason, x)
             reason = reason[:-1]
-            out = out + " :" + reason
+            out = "%s :%s" % (out,reason)
 
-    notice("Attempting to kick %s from %s..." % (user, chan))         
+    notice("Attempting to kick %s from %s..." % (user, chan))
     input.conn.send(out)
 
 @hook.command
 def say(inp, input=None, notice=None):
-    ".say [channel] <message> -- makes the bot say <message> in [channel]. if [channel] is blank the bot will say the <message> in the channel the command was used in."
+    ".say [channel] <message> -- makes the bot say <message> in "
+    "[channel]. if [channel] is blank the bot will say the <message> "
+    "in the channel the command was used in."
     if not perm.isadmin(input):
         notice("Only bot admins can use this command!")
         return None
@@ -108,7 +111,9 @@ def say(inp, input=None, notice=None):
 @hook.command("me")
 @hook.command
 def act(inp, input=None, notice=None):
-    ".act [channel] <action> -- makes the bot act <action> in [channel]. if [channel] is blank the bot will act the <action> in the channel the command was used in."
+    ".act [channel] <action> -- makes the bot act <action> in "
+    "[channel]. if [channel] is blank the bot will act the <action> "
+    "in the channel the command was used in."
     if not perm.isadmin(input):
         notice("Only bot admins can use this command!")
         return
@@ -116,17 +121,15 @@ def act(inp, input=None, notice=None):
     if split[0][0] == "#":
         message = ""
         for x in split[1:]:
-            message = message + x + " "
+            message = "%s%s " % (message, x)
         message = message[:-1]
         out = "PRIVMSG %s :\x01ACTION \x01 %s\x01" % (split[0], message)
-#        out = "PRIVMSG %s :\x01ACTION \x01\x034,1 %s\x01" % (split[0], message)
     else:
         message = ""
         for x in split[0:]:
             message = message + x + " "
         message = message[:-1]
         out = "PRIVMSG %s :\x01ACTION %s\x01" % (input.chan, message)
-#        out = "PRIVMSG %s :\x01ACTION \x034,1 %s\x01" % (input.chan, message)
     input.conn.send(out)
 
 @hook.command
@@ -146,7 +149,8 @@ def topic(inp, input=None, notice=None):
         if testsf=="":
             out = "PRIVMSG %s :Cant set topic." % (input.nick)
         else:
-            out = "PRIVMSG "+input.nick+" :Cant set topic. Not enough arguements in command." 
+            out = "PRIVMSG "+input.nick+" :Cant set topic. "
+            "Not enough arguements in command." 
     input.conn.send(out)
 	
 @hook.command
@@ -222,5 +226,6 @@ def mode(inp, conn=None, chan=None, notice=None, input=None):
             user = inp[0]
             inpmode = inp[1]
             out = "MODE %s %s %s" % (chan, inpmode, user)
-        notice("Attempting to add the flag %s in %s to %s..." % (inpmode, chan, user))
+        notice("Attempting to add the flag %s in %s to "
+                                "%s..." % (inpmode, chan, user))
         conn.send(out)

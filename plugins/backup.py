@@ -9,9 +9,10 @@ import dircache
 import thread
 ftplock = thread.allocate_lock()
 
+@hook.singlethread
 @hook.command
-def up(inp, input=None, conn=None):
-    "Nothing to see here. Move along."
+def backup(inp, input=None, conn=None):
+    ",backup -- makes the bot automatically back up it's data base every 3 hours into the location set in the configs. bot owner only."
     if perm.isowner(input):
         repnick=input.nick
         testss = True

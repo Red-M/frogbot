@@ -216,7 +216,8 @@ def mem(inp, chan='', db=None, nick='', notice=None, user='', host='', bot=None,
 def question(inp, chan='', say=None, db=None, input=None, nick="", me=None, bot=None, notice=None):
     "!factoid -- shows what data is associated with word"
     filterhistory = []  # loop detection, maximum recursion depth(s)
-
+    #if "^" in inp:
+    #    inp = inp.replace("^",bot.chanseen[input.conn.server][input.chan][0])
     def varreplace(orig, variables):
         for i in variables.keys():
             orig = orig.replace("$" + i, variables[i])
@@ -369,11 +370,14 @@ def question(inp, chan='', say=None, db=None, input=None, nick="", me=None, bot=
                  "nick": input.conn.nick or "",
                  "target": redirto or "",
                  "inp": args or "",
-		 "ioru": args or nick,
+                 "ioru": args or nick,
                  "word": word or ""}
     variables["inp"] = unicode(variables["inp"])
+    variables["ioru"] = unicode(variables["ioru"])
     if "^" in (variables["inp"]):
         variables["inp"]=str(variables["inp"]).replace("^",bot.chanseen[input.conn.server][input.chan][0])
+    if "^" in (variables["ioru"]):
+        variables["ioru"]=str(variables["ioru"]).replace("^",bot.chanseen[input.conn.server][input.chan][0])
     if mode == "-":   # information
         message = word + " is "
         local = db.execute("select nick from memory where chan=? and word=lower(?)", (chan, word)).fetchone()

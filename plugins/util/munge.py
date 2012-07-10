@@ -65,42 +65,67 @@ character_replacements = {
     'Y': 'Ỳ',
     'Z': 'Ż'}
 
+def mungess(input):
+    nickf = input
+    reps = 0
+    rep = ""
+    for n in xrange(len(nickf)):
+        rep = character_replacements.get(nickf[n])
+        if rep:
+            nickf = nickf[:n] + rep.decode('utf-8') + nickf[n + 1:]
+            reps = reps + 1
+            if reps == munge_count:
+                break
+    if input.nick:
+        return nickf[0]+input.nick[1:]
+    else:
+        return nickf
+    
 def munge(munge_count, input, bot, reps, rep):
-	nickf = input.nick
-	reps = 0
-	rep = ""
-	for n in xrange(len(nickf)):
-		rep = character_replacements.get(nickf[n])
-		if rep:
-			nickf = nickf[:n] + rep.decode('utf-8') + nickf[n + 1:]
-			reps = reps + 1
-			if reps == munge_count:
-				break
-	return nickf
+    nickf = input.nick
+    reps = 0
+    rep = ""
+    for n in xrange(len(nickf)):
+        rep = character_replacements.get(nickf[n])
+        if rep:
+            nickf = nickf[:n] + rep.decode('utf-8') + nickf[n + 1:]
+            reps = reps + 1
+            if reps == munge_count:
+                break
+    if input.nick:
+        return nickf[0]+input.nick[1:]
+    else:
+        return nickf
 
 def minp(munge_count, input, bot, reps, rep):
-	nickf = input.inp
-	reps = 0
-	rep = ""
-	for n in xrange(len(nickf)):
-		rep = character_replacements.get(nickf[n])
-		if rep:
-			nickf = nickf[:n] + rep.decode('utf-8') + nickf[n + 1:]
-			reps = reps + 1
-			if reps == munge_count:
-				break
-	return nickf
+    nickf = input.inp
+    reps = 0
+    rep = ""
+    for n in xrange(len(nickf)):
+        rep = character_replacements.get(nickf[n])
+        if rep:
+            nickf = nickf[:n] + rep.decode('utf-8') + nickf[n + 1:]
+            reps = reps + 1
+            if reps == munge_count:
+                break
+    if input.nick:
+        return nickf[0]+input.inp[1:]
+    else:
+        return nickf
     
 def muninput(input, bot, inpset):
-	munge_count = 0
-	nickf = inpset
-	reps = 0
-	rep = ""
-	for n in xrange(len(nickf)):
-		rep = character_replacements.get(nickf[n])
-		if rep:
-			nickf = nickf[:n] + rep.decode('utf-8') + nickf[n + 1:]
-			reps = reps + 1
-			if reps == munge_count:
-				break
-	return nickf
+    munge_count = 0
+    nickf = inpset
+    reps = 0
+    rep = ""
+    for n in xrange(len(nickf)):
+        rep = character_replacements.get(nickf[n])
+        if rep:
+            nickf = nickf[:n] + rep.decode('utf-8') + nickf[n + 1:]
+            reps = reps + 1
+            if reps == munge_count:
+                break
+    if input.nick:
+        return nickf[0]+inpset[1:]
+    else:
+        return nickf

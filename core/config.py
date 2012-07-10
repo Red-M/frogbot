@@ -4,7 +4,7 @@ import os
 
 
 def save(conf):
-    json.dump(conf, open('config', 'w'), sort_keys=True, indent=2)
+    json.dump(conf, open('config', 'w'), sort_keys=True, indent=1)
 
 if not os.path.exists('config'):
     open('config', 'w').write(inspect.cleandoc(
@@ -14,6 +14,8 @@ if not os.path.exists('config'):
           {
             "local irc":
             {
+              "bouncer-server": "False",
+              "actualaddress": "localhost",
               "user": "frogbot",
               "realname": "frogbot",
               "server": "localhost",
@@ -21,7 +23,7 @@ if not os.path.exists('config'):
               "channels": ["#test"],
               "admins": ["Red_M"],
               "superadmins": ["Red_M"],
-              "owner": ["Red_M"],
+              "owner": "Red_M",
               "reportchan": "#frog",
               "restartcmd": "bot.py",
               "bots": [],
@@ -66,6 +68,9 @@ if not os.path.exists('config'):
             "!tell /x"
           ]
         }''') + '\n')
+
+if not os.path.exists('./plugins/web/variables.vars'):
+    open('./plugins/web/variables.vars', 'w').write(inspect.cleandoc(r''''''))
 
 
 def config():

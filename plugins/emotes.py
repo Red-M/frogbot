@@ -1,6 +1,6 @@
 #written by 303
 
-from util import hook
+from util import hook, perm
 import re
 import random
 import usertracking
@@ -13,7 +13,7 @@ def trigger(func):
 
 @trigger
 def on_eat(match, input=None, **kw):
-    r'eats\s+(?P<whom>\S+)'
+    r' eats\s+(?P<whom>\S+)'
 
     if match.group("whom").lower() == input.conn.nick.lower():
         reply = random.choice((
@@ -31,7 +31,7 @@ def on_kick(match, input=None, bot=None, db=None, **kw):
     if match.group("whom").lower() != input.conn.nick.lower():
         return
 
-    if not usertracking.query(db, bot.config, input.nick, input.chan, "remotecontrol"):
+    if not perm.isadmin(input):
         reply = random.choice((
             "{0.nick}: </3",
             "Ow :(",
@@ -60,6 +60,31 @@ def on_yawn(match, input=None, **kw):
         "hands {0.nick} a cup of coffee",
     ))
     input.me(reply.format(input))
+
+@trigger
+def on_slap(match, input=None, **kw):
+    r'\bbeats\s+(?P<whom>\S+)'
+
+    if match.group("whom").lower() != input.conn.nick.lower():
+        return
+    if not perm.isadmin(input):
+        reply = random.choice((
+            "{0.nick}: </3",
+           "Ow :(",
+           "I will remember this.",
+           "What did I do? :<",
+          "Why? Why, {0.nick}?",
+           "Ouch",
+        ))
+        input.say(reply.format(input))
+        return
+    input.say(random.choice((
+        "Fine :<",
+        "meow...",
+        "Yes all mighty lord.",
+        "Yes, master.",
+    )))
+    return
 
 @trigger
 def on_slap(match, input=None, **kw):

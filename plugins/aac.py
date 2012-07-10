@@ -4,6 +4,7 @@ import json, time
 
 @hook.command
 def save(inp, bot=None, input=None):
+	"saves the bot's config. bot admins only."
 	if perm.isadmin(input):
 		confofall=bot.config
 		for xcon in bot.conns:
@@ -24,9 +25,12 @@ def cheval(inp, bot=None, input=None, nick=None, db=None, chan=None):
 		return "Nope.avi"
 	try:
 		if '^' in input.paraml[1]:
-			inp = str(inp).replace("^", bot.chanseen[input.conn.server][input.chan][0])
-		inpss= "input.say(str("+inp+"))"
-		blocked=["sys.stdout",".connect()",'send("quit',"send('quit",'conn.connect()',"bot.conns[",'conf["ftp_pw"]','config["censored_strings"]','conf["server_password"]','conf["nickserv_password"]',"conf['ftp_pw']","config['censored_strings']","conf['server_password']","conf['nickserv_password']"]
+			inp = str(inp).replace("^", \
+                            bot.chanseen[input.conn.server][input.chan][0])
+		inpss = "input.say(str("+inp+"))"
+		blocked = ["sys.stdout",".connect",'.send',
+        "bot.conns[",".conf",".config",".clear",".kill",
+        "/home/redm","__import__"]
 		igncmds=blocked
 		for data in igncmds:
 			if str(data) in input.inp:
@@ -55,6 +59,8 @@ def cheval(inp, bot=None, input=None, nick=None, db=None, chan=None):
 	
 @hook.command
 def ident(paraml, conn=None, bot=None, input=None):
+	",ident   makes the bot identify with what ever..." \
+    " use in case of fire or auto identify failing..."
 	if perm.isadmin(input):
 		nickserv_password = conn.conf.get('nickserv_password', '')
 		nickserv_name = conn.conf.get('nickserv_name', 'nickserv')
@@ -66,7 +72,8 @@ def ident(paraml, conn=None, bot=None, input=None):
 					bot.config['censored_strings'].remove("^^")
 					bot.config['censored_strings'].remove("^^")
 					bot.config['censored_strings'].remove(nickserv_password)
-			conn.msg(nickserv_name, nickserv_command2 % (conn.nick,nickserv_password))
+			conn.msg(nickserv_name, nickserv_command2 % (conn.nick,
+                                                        nickserv_password))
 			conn.msg(nickserv_name, nickserv_command % nickserv_password)
 			time.sleep(1)
 			bot.config['censored_strings'].append(nickserv_password)

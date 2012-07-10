@@ -50,6 +50,7 @@ bot.twitterlists = {}
 bot.connected={}
 bot.test={}
 bot.html=0
+bot.path=__file__
 
 try:
     for name, conf in bot.config['connections'].iteritems():

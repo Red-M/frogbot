@@ -22,6 +22,10 @@ def sieve_suite(bot, input, func, kind, args):
             input.paraml[1].replace("^",bot.chanseen[input.conn.server][input.chan][0])
         if input.trigger in bot.config["disabled_commands"]:
             return None
+
+    if input.paraml[0].startswith("\x01PING "):
+		input.conn.send("NOTICE "+input.nick+" :"+input.inp[1])
+
     fn = re.match(r'^plugins.(.+).py$', func._filename)
     disabled = bot.config.get('disabled_plugins', [])
     if fn and fn.group(1).lower() in disabled:
@@ -36,6 +40,15 @@ def sieve_suite(bot, input, func, kind, args):
             denied_channels = map(unicode.lower, acl['allow-except'])
             if input.chan.lower() in denied_channels:
                 return None
+
+    if kind=="event" and (perm.isignored(input) or perm.isbot(input)):
+        if not perm.isadmin(input) and (not "NICK" in args["events"]):
+            return None
+        else:
+            return input
+    else:
+        return input
+
 #the extended permissions were moved here.
     if args.get('adminonly', False):
         if not perm.isadmin(input):

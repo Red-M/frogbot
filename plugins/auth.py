@@ -1,11 +1,12 @@
-# auth plugin written by Red-M on github or Red_M on esper.net
+# authentication plugin written by Red-M on github or Red_M on esper.net
 from util import hook, perm
 import hashlib
 
 
-@hook.command#(owneronly=True)
-def auth(inp, input=None, db_auth=None, bot=None, conn=None):
-    "auth with this bot. NOTE: no password is stored in plain text. all passwords are stored as a sha512 hash. usage: ,auth login <username> <password>"
+@hook.command('auth')
+@hook.command
+def authenticate(inp, input=None, db_auth=None, bot=None, conn=None):
+    "authenticate with this bot. NOTE: no password is stored in plain text. all passwords are stored as a sha512 hash. usage: ,auth login <username> <password>"
     db_auth.execute("create table if not exists auth(user, pass, groups)")
     db_auth.commit()
     check=input.inp.split(' ')
@@ -13,7 +14,7 @@ def auth(inp, input=None, db_auth=None, bot=None, conn=None):
     if len(check)==1 and check[0]=="help":
         out="To register with "+conn.nick+" please use ,auth <signup/reg> <username-you-want> <password-you-want>"
         out=out+". To login with "+conn.nick+" please use ,auth login <username-you-set> <password-you-set>"
-        out=out+". If you forgot your password please contact "+conn.conf["owner"][0]+" about it."
+        out=out+". If you forgot your password please contact "+conn.conf["owner"]+" about it."
         return(out)
     if len(check)==2 and check[0]=="logout":
         groupcheck=''.join(str(db_auth.execute("select groups from auth where user=(?)",(check[1],)).fetchone()[0]))

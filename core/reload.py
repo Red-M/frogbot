@@ -110,7 +110,7 @@ def reload(init=False):
                         bot.plugs[type] += [data]
 
                         if not init:
-                            print '# new plugin (type: %s) loaded:' % \
+                            print '# new %s plugin loaded:' % \
                                     type, format_plug(data)
 
     if changed:

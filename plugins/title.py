@@ -54,7 +54,7 @@ def title(inp, db=None, chan=None, bot=None, input=None):
         if m:
             m = (''.join(m[0])).split(" ")[0]
             inp = m
-    if not "http://" in inp:
+    if not ("http://" in inp or "https://" in inp):
         inp = ""
     if inp == "":
         return ",title <url> - get title of <url>"

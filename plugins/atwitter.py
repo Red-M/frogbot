@@ -100,7 +100,7 @@ def tfeed(inp, input=None, bot=None, db_twitter=None):
                 i=i+1
                 if i == 32:
                     for xcon in bot.conns:
-                        bot.conns[xcon].send('PRIVMSG '+bot.conns[xcon].conf["reportchan"]+" :No new tweets from '"+feed+"'.")
+                        perm.repamsg(input,"No new tweets from '"+feed+"'.")
                     i=0
                 time.sleep(ttl)
             elif not lasttweet==tweet and not tweet.startswith("error: "):
@@ -122,7 +122,7 @@ def tfeed(inp, input=None, bot=None, db_twitter=None):
 @hook.command("twitterlistfeed")
 @hook.command
 def tlfeed(inp, input=None, bot=None, db_twitter=None):
-    "auto tweet getter. ,tlfeed <twitter-list-name> <owner of list>"
+    "auto twitter list tweet getter. ,tlfeed <twitter-list-name> <owner of list without @ at the start>"
     db_twitter.execute("create table if not exists twitterlistfeeds(list, tweet)")
     db_twitter.commit()
     i=0
@@ -153,7 +153,7 @@ def tlfeed(inp, input=None, bot=None, db_twitter=None):
             if errormatch(tweet):
                 if tweet.endswith("400"):
                     ttl=ttl+60
-                    input.say("I have been rate limited on twitter. This means you ether have too many lists/people beening watched at once (the max is 4 without rate limiting from twitter.) please ether make a bigger list or remove some of the people/lists being watched...")
+                    return("I have been rate limited on twitter. This means you ether have too many lists/people beening watched at once (the max is 4 without rate limiting from twitter.) please ether make a bigger list or remove some of the people/lists being watched...")
                     tweet=lasttweet
                 if tweet.endswith("404"):
                     testss= False
@@ -171,8 +171,7 @@ def tlfeed(inp, input=None, bot=None, db_twitter=None):
                 i=i+1
                 bot.twitterlists[feedname]=True
                 if i == (32):
-                    for xcon in bot.conns:
-                        bot.conns[xcon].send('PRIVMSG '+bot.conns[xcon].conf["reportchan"]+" :No new tweets from '"+feedname+"'.")
+                    perm.repamsg(input,"No new tweets from '"+feedname+"'.")
                     i=0
                 time.sleep(ttl)
             elif not lasttweet==tweet and not tweet.startswith("error: "):
@@ -191,10 +190,9 @@ def tlfeed(inp, input=None, bot=None, db_twitter=None):
     else:
         return "Nope."
 
-@hook.command("twittersettings")
 @hook.command("tset")
 @hook.command
-def twitterchan(inp, input=None, bot=None):
+def twittersettings(inp, input=None, bot=None):
     "This command is for the settings of the auto twitter."
     if perm.isadmin(input) and not input.inp=='':
         check = input.inp.split(' ')

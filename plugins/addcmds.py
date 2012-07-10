@@ -17,11 +17,12 @@ def kl(inp, say=None, nick=None, input=None, bot=None):
             bot.conns[xcon].send("NICK "+input.conn.nick+"|offline")
         time.sleep(0.5)
         for xcon in bot.conns:
-            bot.conns[xcon].send('QUIT :\x02\x034,1Kill switch activated by '+input.nick+'.')
+            bot.conns[xcon].send("QUIT :\x02\x034,1Kill switch activated "
+                                                    "by %s." % (input.nick))
         time.sleep(0.1)
         if os.name == 'posix':
             pid = os.getpid()
-            os.system("kill "+str(pid))
+            os.system("kill %s" % (pid))
         elif os.name == 'nt':
             sys.exit(0)
 
@@ -37,7 +38,8 @@ def rl(inp, say=None, input=None, bot=None):
         json.dump(confofall, open('config', 'w'), sort_keys=True, indent=1)
         time.sleep(0.1)
         for xcon in bot.conns:
-            bot.conns[xcon].send('QUIT :\x02\x034,1Restart switch activated by '+input.nick+'.')
+            bot.conns[xcon].send('QUIT :\x02\x034,1Restart switch activated'
+                                                    ' by %s.' % (input.nick))
         time.sleep(0.1)
         if os.name == 'posix':
             os.system("screen python ./bot.py")
@@ -51,15 +53,16 @@ def rl(inp, say=None, input=None, bot=None):
 
 @hook.command
 def users(inp, bot=None, input=None):
-    input.say(" ".join(input.conn.users.users))
+    if perm.isadmin(input):
+        input.say(" ".join(input.conn.users.users))
 
 @hook.command("channels")
 @hook.command
 def chan(inp, input=None, db=None, bot=None, users=None):
     "lists the current channels that I am in..."
     outrs='\x02, \x02'.join(input.conn.conf['channels'])
-    input.conn.send("PRIVMSG "+ input.chan +" :I am in these channels: \x02"+outrs+".")
-#    input.conn.send("PRIVMSG "+ input.chan +" :I am in these channels: \x02\x034,1"+outrs)
+    input.conn.send("PRIVMSG %s :I am in these channels:"
+                                " \x02%s." % (input.chan,outrs))
 
 @hook.command
 def raw(inp, input=None):
@@ -67,5 +70,5 @@ def raw(inp, input=None):
 	if perm.isowner(input):
 		input.conn.send(inp)
 	else:
-		input.conn.send("PRIVMSG "+input.nick+" :You cannot do this.")
+		input.conn.send("PRIVMSG %s :You cannot do this." % (input.nick))
 		

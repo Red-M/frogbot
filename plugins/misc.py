@@ -55,7 +55,7 @@ def onjoin(paraml, conn=None, bot=None, input=None):
     # join channels
     for channel in conn.channels:
         conn.send('JOIN '+channel)
-        time.sleep(1)  # don't flood JOINs
+        time.sleep(.1)  # don't flood JOINs
 
     # set user-agent
     rev = get_version()
