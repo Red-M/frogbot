@@ -1,6 +1,6 @@
 # written by Red-M on github or Red_M on irc.esper.net
 from util import hook, perm, http
-import json, time
+import json, time, re
 
 @hook.command
 def save(inp, bot=None, input=None):
@@ -80,3 +80,19 @@ def ident(paraml, conn=None, bot=None, input=None):
 			input.say("Done.")
 	else:
 		input.say("Nope.avi")
+
+@hook.command        
+def match(inp,input=None):
+    inuserhost = input.nick+'!'+input.user+'@'+input.host
+    list=[]
+    i=0
+    for data in input.conn.conf["ignore"]:
+        regex = re.compile(data.replace("*",".*"))
+        match = regex.search(inuserhost)
+        i=i+1
+        if (match and input.nick not in input.conn.conf["admins"]) \
+        or (input.chan in input.conn.conf["ignore"]):
+            return True
+        else:
+            if not match and len(input.conn.conf["ignore"])==i:
+                return False

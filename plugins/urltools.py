@@ -7,7 +7,7 @@ import urlparse
 import repaste
 import urlhistory
 
-ignored_urls = ["http://youtube.com","http://www.youtube.com","http://pastebin.com","http://www.pastebin.com","http://mibpaste.com","http://fpaste.com"]
+ignored_urls = ["http://youtube.com","https://youtube.com","https://www.youtube.com","http://www.youtube.com","http://pastebin.com","http://www.pastebin.com","http://mibpaste.com","http://fpaste.com"]
 maxlen = 4086
 titler = re.compile(r'(?si)<title>(.+?)</title>')
 wordDic = {
@@ -30,7 +30,7 @@ wordDic = {
 def check_response(headers):
     type = headers.get("content-type", None)
     if not type or "html" not in type:
-        reply = "Link is not HTML but %s" % type
+        reply = "%s" % type
         length = headers.get("content-length", None)
         if length is not None:
             reply += ", length %s" % length
@@ -110,7 +110,7 @@ def urlparser(match, say = None, input=None, bot=None):
     inpo = input.params.replace(input.chan+" :","")
     url = urlnorm.normalize(match.group().encode('utf-8'))
     url2 = urltest(url,match)
-    if not (perm.isignored(input) or perm.isbot(input)) and not (inpo.startswith(",t") or inpo.startswith(",title")) and not ("@" in url):
+    if (not input.conn.conf['autotitle']==False) and (not (perm.isignored(input) or perm.isbot(input))) and not (inpo.startswith(",t") or inpo.startswith(",title") or inpo.startswith(",shor")) and not ("@" in url):
         #print "[debug] URL found"
         if not (url.startswith("http://") or url.startswith("https://") or url.startswith("ftp://")):
             url = "http://"+url
@@ -132,3 +132,5 @@ def urlparser(match, say = None, input=None, bot=None):
             return("(Link) %s" % title)
         else:
             return("(Link) %s <=> %s" % (realurl, title))
+    else:
+        return

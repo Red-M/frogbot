@@ -1,6 +1,6 @@
 # plugin by Red_M on irc.esper.net or Red-M on github.
 from util import hook, perm
-import os, sys, time, json
+import os, sys, time, json, socket
 
 @hook.command
 def kl(inp, say=None, nick=None, input=None, bot=None):
@@ -17,14 +17,21 @@ def kl(inp, say=None, nick=None, input=None, bot=None):
             bot.conns[xcon].send("NICK "+input.conn.nick+"|offline")
         time.sleep(0.5)
         for xcon in bot.conns:
-            bot.conns[xcon].send("QUIT :\x02\x034,1Kill switch activated "
-                                                    "by %s." % (input.nick))
+            if inp=="":
+                bot.conns[xcon].send('QUIT :\x02\x034,1Kill switch '
+                                    'activated by %s.' % (input.nick))
+            else:
+                bot.conns[xcon].send('QUIT :\x02\x034,1Kill switch '
+                        'activated by %s. Reason: %s' % (input.nick, inp))
         time.sleep(0.1)
         if os.name == 'posix':
             pid = os.getpid()
+            client("127.0.0.1", 4329, "bot term. shutdown. NOW")
             os.system("kill %s" % (pid))
         elif os.name == 'nt':
-            sys.exit(0)
+            pid = os.getpid()
+            client("127.0.0.1", 4329, "bot term. shutdown. NOW")
+            os.system("taskkill /PID %s" % (pid))
 
 @hook.command
 def rl(inp, say=None, input=None, bot=None):
@@ -38,19 +45,34 @@ def rl(inp, say=None, input=None, bot=None):
         json.dump(confofall, open('config', 'w'), sort_keys=True, indent=1)
         time.sleep(0.1)
         for xcon in bot.conns:
-            bot.conns[xcon].send('QUIT :\x02\x034,1Restart switch activated'
-                                                    ' by %s.' % (input.nick))
+            if inp=="":
+                bot.conns[xcon].send('QUIT :\x02\x034,1Restart switch '
+                                    'activated by %s.' % (input.nick))
+            else:
+                bot.conns[xcon].send('QUIT :\x02\x034,1Restart switch '
+                        'activated by %s. Reason: %s' % (input.nick, inp))
         time.sleep(0.1)
         if os.name == 'posix':
-            os.system("screen python ./bot.py")
+            client("127.0.0.1", 4329, "bot term. shutdown. NOW")
             time.sleep(1)
             pid = os.getpid()
-            os.system("kill "+str(pid))
+            os.execl("./b", "b")
+            os.system("kill %s" % (pid))
         elif os.name == 'nt':
             os.system(bot.config["restartcmd"])
+            client("127.0.0.1", 4329, "bot term. shutdown. NOW")
             time.sleep(1)
-            sys.exit()
+            pid = os.getpid()
+            os.system("taskkill /PID %s" % (pid))
 
+def client(ip, port, message):
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.connect((ip, port))
+    try:
+        sock.sendall(message)
+    finally:
+        sock.close()
+            
 @hook.command
 def users(inp, bot=None, input=None):
     if perm.isadmin(input):

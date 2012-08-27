@@ -1,5 +1,6 @@
 # method from Lukeroge edited and adjusted for frog by Red-M on github
 # or Red_M on esper.net
+import re
 
 def isadmin(input):
 	inuserhost=input.user+'@'+input.host
@@ -29,21 +30,40 @@ def isowner(input):
 	else:
 		return False
 def isbot(input):
-	inuserhost = input.user+'@'+input.host
-	if input.nick in input.conn.conf["bots"] \
-    or inuserhost in input.conn.conf["bots"]:
-		return True
-	else:
-		return False
+    inuserhost = input.nick+'!'+input.user+'@'+input.host
+    list=[]
+    i=0
+    for data in input.conn.conf["bots"]:
+        regex = re.compile(data.replace("*",".*"))
+        match = regex.search(inuserhost)
+        i=i+1
+        if (match and input.nick not in input.conn.conf["admins"]) \
+        or (input.chan in input.conn.conf["bots"]):
+            return True
+        else:
+            if not match and len(input.conn.conf["bots"])==i:
+                return False
+                
 def isignored(input):
-	inuserhost = input.user+'@'+input.host
-	if ((input.nick in input.conn.conf["ignore"]) \
-    or (inuserhost in input.conn.conf["ignore"]) \
-    or (input.chan in input.conn.conf["ignore"])) \
-    and input.nick not in input.conn.conf["admins"]:
-		return True
-	else:
-		return False
+    inuserhost = input.nick+'!'+input.user+'@'+input.host
+    list=[]
+    i=0
+    for data in input.conn.conf["ignore"]:
+        if input.chan in input.conn.conf["ignore"] and (input.nick not in input.conn.conf["admins"]):
+            return True
+        else:
+            if input.nick not in input.conn.conf["admins"]:
+                regex = re.compile(data.replace("*",".*"))
+                match = regex.search(inuserhost)
+                i=i+1
+                if (match and input.nick not in input.conn.conf["admins"]) \
+                or (input.chan in input.conn.conf["ignore"]):
+                    return True
+                else:
+                    if not match and len(input.conn.conf["ignore"])==i:
+                        return False
+            else:
+                return False
         
 def amsg(input,msg):
     for xcon in input.bot.conns:

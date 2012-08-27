@@ -1,6 +1,6 @@
 # written by Red-M on github or Red_M on irc.esper.net
 from util import hook, perm, munge
-import json
+import json, re
 
 errorMsg = ("error. unknown error or not a valid use for this command. "
         "proper use: ,perm <add/remove|list> "
@@ -27,68 +27,70 @@ def permissions(inp, input=None, bot=None):
         if check[0]=="list" and len(check)==2:
             listlist=["bots","admins","superadmins","owner"]
             if check[1]=="bots":
-                rep = listbots(bot,input)
+                return listbots(bot,input)
             if check[1]=="admins":
-                rep = listadmins(bot,input)
+                return listadmins(bot,input)
             if check[1]=="superadmins":
-                rep = listsuperadmins(bot,input)
+                return listsuperadmins(bot,input)
             if check[1]=="owner":
-                rep = listowner(bot,input)
+                return listowner(bot,input)
             elif not (check[1] in listlist):
-                rep = ("error. unknown error or not a permissions group.")
+                return("error. unknown error or not a permissions group.")
         if len(check)==3:
             check[1]=check[1].lower()
             if perm.isadmin(input):
                 if check[0]=="add" and check[1]=="bot" and input.conn.conf["bots"].count(check[2])==0:
-                    rep = addbot(check[2],bot,input)
+                    return addbot(check[2],bot,input)
                 if check[0]=="remove" and check[1]=="bot" and input.conn.conf["bots"].count(check[2])==1:
-                    rep = removebot(check[2],bot,input)
-                elif check[1]=="bot" and not check[2]=="":
-                        rep = ("error. unknown error or already a "+check[1])
+                    return removebot(check[2],bot,input)
+                else:
+                    if check[1]=="bot" and check[0]=="add":
+                        return("error. unknown error or already a "+check[1])
+                    if check[1]=="bot" and check[0]=="remove":
+                        return("error. unknown error or not a "+check[1])
             if perm.issuperadmin(input):
                 if check[0]=="add":
                     if check[1]=="admin" and input.conn.conf["admins"].count(check[2])==0:
-                        rep = addadmin(check[2], bot, input)
+                        return addadmin(check[2], bot, input)
                     if check[1]=="bot" and input.conn.conf["bots"].count(check[2])==0:
-                        rep = addbot(check[2],bot,input)
-                    elif (check[1]=="bot" or check[1]=="admin") and not check[2]=="":
-                        rep = ("error. unknown error or already a "+check[1])
+                        return addbot(check[2],bot,input)
+                    elif (check[1]=="bot" or check[1]=="admin"):
+                        return("error. unknown error or already a "+check[1])
                 if check[0]=="remove":
                     if check[1]=="admin" and input.conn.conf["admins"].count(check[2])==1:
-                        rep = removeadmin(check[2],bot,input)
+                        return removeadmin(check[2],bot,input)
                     if check[1]=="bot" and input.conn.conf["bots"].count(check[2])==1:
-                        rep = removebot(check[2],bot,input)
-                    elif (check[1]=="bot" or check[1]=="admin") and (not check[2]==""):
-                        rep = ("error. unknown error or not a "+check[1])
+                        return removebot(check[2],bot,input)
+                    elif (check[1]=="bot" or check[1]=="admin"):
+                        return("error. unknown error or not a "+check[1])
             if perm.isowner(input):
                 if check[0]=="add":
                     if check[1]=="admin" and input.conn.conf["admins"].count(check[2])==0:
-                        rep = addadmin(check[2], bot, input)
+                        return addadmin(check[2], bot, input)
                     if check[1]=="superadmin" and input.conn.conf["superadmins"].count(check[2])==0:
-                        rep = addsuperadmin(check[2], bot, input)
+                        return addsuperadmin(check[2], bot, input)
                     if check[1]=="bot" and input.conn.conf["bots"].count(check[2])==0:
-                        rep = addbot(check[2],bot,input)
-                    elif (check[1]=="bot" or check[1]=="admin" or check[1]=="superadmin") and (not check[2]==""):
-                        rep = ("error. unknown error or already a "+check[1])
+                        return addbot(check[2],bot,input)
+                    elif (check[1]=="bot" or check[1]=="admin" or check[1]=="superadmin"):
+                        return("error. unknown error or already a "+check[1])
                 if check[0]=="remove" and perm.isowner(input):
                     if check[1]=="admin" and input.conn.conf["admins"].count(check[2])==1:
-                        rep = removeadmin(check[2],bot,input)
+                        return removeadmin(check[2],bot,input)
                     if check[1]=="superadmin" and input.conn.conf["superadmins"].count(check[2])==1:
-                        rep = removesuperadmin(check[2],bot,input)
+                        return removesuperadmin(check[2],bot,input)
                     if check[1]=="bot" and input.conn.conf["bots"].count(check[2])==1:
-                        rep = removebot(check[2],bot,input)
-                    elif (check[1]=="bot" or check[1]=="admin" or check[1]=="superadmin") and (not check[2]==""):
-                        rep = ("error. unknown error or not a "+check[1])
+                        return removebot(check[2],bot,input)
+                    elif (check[1]=="bot" or check[1]=="admin" or check[1]=="superadmin"):
+                        return ("error. unknown error or not a "+check[1])
             elif not perm.isadmin(input):
-                rep = ("You are not an admin or not high enough in "
+                return("You are not an admin or not high enough in "
                 "this bot's permission's system to do this.")
         if check[0]=="help":
-            rep = errorMsg
+            return errorMsg
         elif not ((check[0]=="list" and len(check)==2) or (len(check)==3)):
-            rep = errorMsg
+            return errorMsg
     elif not check[0] in cmdlist:
-        rep = errorMsg
-    return rep
+        return errorMsg
         
 def addadmin(inp, bot, input):
     input.conn.conf["admins"].append(inp)
@@ -107,12 +109,24 @@ def removeadmin(inp, bot, input):
     return"Done."
 
 def addbot(inp, bot, input):
-    input.conn.conf["bots"].append(inp)
-    confofall=bot.config
-    for xcon in bot.conns:
-        confofall['connections'][xcon]=bot.conns[xcon].conf
-    json.dump(confofall, open('config', 'w'), sort_keys=True, indent=1)
-    return"Done."
+    regex = re.compile("(.*)!(.*)@(.*)")
+    match = regex.search(inp)
+    if (inp=='' or inp=="*!*@*") or (not match):
+        return("no hostmask was added to the bot list...ignoring command...")
+    if perm.isadmin(input) and match and (not match.group(1)=="" and not match.group(2)=="" and not match.group(3)==""):
+        if input.conn.conf["bots"].count(inp)==0:
+            input.conn.conf["bots"].append(inp)
+            input.conn.conf["bots"].sort()
+            confofall=bot.config
+            for xcon in bot.conns:
+                confofall['connections'][xcon]=bot.conns[xcon].conf
+                json.dump(confofall, open('config', 'w'), sort_keys=True, 
+                                                            indent=1)
+                return("done.")
+        else:
+            return("already a bot...")
+    else:
+        return("Nope.avi")
 
 def removebot(inp, bot, input):
     input.conn.conf["bots"].remove(inp)
@@ -166,23 +180,44 @@ def listowner(bot, input):
 @hook.command("stfu")
 @hook.command
 def ignore(inp, bot=None, input=None):
-    "adds a nick/host to the ignore list..."
-    if inp=='':
-        input.say("no nick was added to ignore...ignoring command...")
-    if perm.isadmin(input):
-        if input.conn.conf["ignore"].count(inp)==0:
-            input.conn.conf["ignore"].append(inp)
-            input.conn.conf["ignore"].sort()
-            confofall=bot.config
-            for xcon in bot.conns:
-                confofall['connections'][xcon]=bot.conns[xcon].conf
-            json.dump(confofall, open('config', 'w'), sort_keys=True, 
-                                                        indent=1)
-            input.say("done.")
+    "adds a hostmask to the ignore list... eg ,ignore <nick>!<ident>@<host> -- * can be used as an all"
+    if not inp.startswith("#"):
+        regex = re.compile("(.*)!(.*)@(.*)")
+        match = regex.search(inp)
+        if (inp=='' or inp=="*!*@*") or (not match):
+            return("no hostmask was added to ignore...ignoring command...")
+        if perm.isadmin(input) and match and (not match.group(1)=="" and not match.group(2)=="" and not match.group(3)==""):
+            if input.conn.conf["ignore"].count(inp)==0:
+                input.conn.conf["ignore"].append(inp)
+                input.conn.conf["ignore"].sort()
+                confofall=bot.config
+                for xcon in bot.conns:
+                    confofall['connections'][xcon]=bot.conns[xcon].conf
+                json.dump(confofall, open('config', 'w'), sort_keys=True, 
+                                                            indent=1)
+                return("done.")
+            else:
+                return("already ignored...")
         else:
-            return("already ignored...")
-    else:
-        return("Nope.avi")
+            return("Nope.avi")
+    if inp.startswith("#"):
+        if inp=='':
+            return("no hostmask was added to ignore...ignoring command...")
+        if perm.isadmin(input):
+            if input.conn.conf["ignore"].count(inp)==0:
+                input.conn.conf["ignore"].append(inp)
+                input.conn.conf["ignore"].sort()
+                confofall=bot.config
+                for xcon in bot.conns:
+                    confofall['connections'][xcon]=bot.conns[xcon].conf
+                json.dump(confofall, open('config', 'w'), sort_keys=True, 
+                                                            indent=1)
+                return("done.")
+            else:
+                return("already ignored...")
+        else:
+            return("Nope.avi")
+
 
 @hook.command("kthx")
 @hook.command
@@ -224,7 +259,7 @@ def ign(inp, bot=None, input=None):
             else:
                 input.say("I do not have that person on my ignore list...")
 
-@hook.command
+#@hook.command
 def gtfo(inp, input=None, bot=None):
     "makes me leave the channel. can be used by a channel op or bot admin..."
     if perm.isadmin(input) \

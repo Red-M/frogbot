@@ -1,5 +1,5 @@
 #plugin made by Red-M on github or Red_M on esper.net  help from Luke.
-from util import hook, perm, http, mcrcon, webserver
+from util import hook, perm, http, mcrcon
 from datetime import timedelta
 import cherrypy
 import os
@@ -29,31 +29,23 @@ plays = 2
 
 class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
     def handle(self):
-        sent = False
         data = self.request.recv(1024)
         if data.startswith("requesting bot variable data refreshment." \
                                                         " please respond."):
             self.request.sendall(str(sendo))
-            sent = True
-        if data=="bot term. shutdown. NOW":
-            self.server.shutdown()
-            sent = True
-        elif sent==False:
-            try:
-                cur_thread = threading.current_thread()
-                response = "{}: {}".format(cur_thread.name, data)
-                responseReplaced = response.replace("  ","").replace("\n","") \
-                                                            .replace("\\","\\\\")
-                getmcdata.append("%s:%s wrote: %s" %
-                                (self.client_address[0],self.client_address[1], \
-                                                                responseReplaced))
-                if data=="\x01":
-                    self.request.sendall("\x02")
-                self.request.sendall("\x00\x07"+"\x20"*128+"\x00")
-                self.request.sendall("\x0e"+mess+"\x20"*(64-len(mess)))
-                playeramount.append(cur_thread.name)
-            except Exception, msg:
-                print("We have an error from the web backend of: "+str(msg))
+        else:
+            cur_thread = threading.current_thread()
+            response = "{}: {}".format(cur_thread.name, data)
+            responseReplaced = response.replace("  ","").replace("\n","") \
+                                                        .replace("\\","\\\\")
+            getmcdata.append("%s:%s wrote: %s" %
+                            (self.client_address[0],self.client_address[1], \
+                                                            responseReplaced))
+            if data=="\x01":
+                self.request.sendall("\x02")
+            self.request.sendall("\x00\x07"+"\x20"*128+"\x00")
+            self.request.sendall("\x0e"+mess+"\x20"*(64-len(mess)))
+            playeramount.append(cur_thread.name) 
 
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     pass
@@ -67,7 +59,7 @@ def web(inp,input=None,bot=None):
         chanxcon = []
         i = 0
         for xcon in bot.conns:
-            if bot.conns[xcon].conf['bouncer-server']==True:
+            if bot.conns[xcon].conf['bouncer-server'].lower()=="true":
                 chanxcon.append([])
                 chanxcon[i].append("<li>%s:</li>" %
                 (str(bot.conns[xcon].conf['actualaddress'])))
@@ -97,14 +89,12 @@ def webservers(inp,input=None,bot=None):
             server_thread = threading.Thread(target=bottestweb.serve_forever)
             server_thread.daemon = True
             server_thread.start()
-            #if os.name == 'posix':
-            #    os.system("./plugins/web/server.py")
-            #elif os.name == 'nt':
-            #    pathing = "plugins\web\server.py"
-            #    os.system(str(bot.path).replace("bot.py","")+pathing)
-            webserver.web_init()
-            i+=1
-        time.sleep(.1)
+            if os.name == 'posix':
+                os.system("./plugins/web/server.py")
+            elif os.name == 'nt':
+                pathing = "plugins\web\server.py"
+                os.system(str(bot.path).replace("bot.py","")+pathing)
+            #i+=1
 
 def savevars(nickss,chanss,bot,input):
     test={}
@@ -226,15 +216,16 @@ def helpss(bot):
 
 def client(ip, port, message):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.connect((ip, port))
     try:
-        sock.connect((ip, port))
         sock.sendall(unicode(message))
         print message
         data = sock.recv(1024*4).decode("utf8").replace("\n","\\n")
         enddata = data
         data = "response from ("+str(ip)+":"+str(port)+"): "+enddata
     except Exception, msg:
-        data = "("+str(ip)+":"+str(port)+") Error: '"+str(msg)+"'."
+        sock.close()
+        return "("+str(ip)+":"+str(port)+") Error: '"+str(msg)+"'."
     finally:
         sock.close()
         return data
@@ -290,7 +281,7 @@ def tcp(inp,bot=None,input=None):
     check = input.inp.split(" ")
     check2 = input.inp.replace(check[0]+" "+check[1]+" ","")
     if perm.isowner(input):
-        return(str(client(check[0],int(check[1]),check2)))
+        return client(check[0],int(check[1]),check2)
     return "Nope.avi"
 
 def cmdgrouplen(bot):

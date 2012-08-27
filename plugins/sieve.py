@@ -41,8 +41,8 @@ def sieve_suite(bot, input, func, kind, args):
             if input.chan.lower() in denied_channels:
                 return None
 
-    if kind=="event" and (perm.isignored(input) or perm.isbot(input)):
-        if not perm.isadmin(input) and (not "NICK" in args["events"]):
+    if (perm.isignored(input) or perm.isbot(input)):
+        if not (perm.isadmin(input) and kind=="event" and ("NICK" in args["events"])):
             return None
         else:
             return input
@@ -82,9 +82,9 @@ def seen_save(db, input):
     
 @hook.singlethread
 @hook.event('PRIVMSG')
-def seen_user(inp, nick='', db_seen=None, input=None, bot=None):
-    db_init(db_seen)
-    seen_save(db_seen, input)
+def seen_user(inp, nick='', db=None, input=None, bot=None):
+    db_init(db)
+    seen_save(db, input)
     
 @hook.event('PRIVMSG')
 def chanwatching(inp, input=None, bot=None):

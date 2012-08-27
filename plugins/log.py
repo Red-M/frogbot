@@ -100,5 +100,5 @@ def log(paraml, input=None, bot=None):
 
     if input.chan:
         fd = get_log_fd(bot.logs_dir, input.server, input.chan)
-        if input.bot.config["log"]=="true" and not perm.isignored(input) and input.nick not in input.conn.conf["owner"]:  #if the chan is ignored then dont log it and dont print anything that doesnt apply to the bot
+        if input.bot.config["log"]==True and not perm.isignored(input) and input.nick not in input.conn.conf["owner"]:  #if the chan is ignored then dont log it and dont print anything that doesnt apply to the bot
             fd.write(timestamp + ' ' + beau + '\n')

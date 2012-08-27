@@ -8,66 +8,66 @@ def save(conf):
 
 if not os.path.exists('config'):
     open('config', 'w').write(inspect.cleandoc(
-        r'''
-        {
-          "connections":
-          {
-            "local irc":
-            {
-              "bouncer-server": "False",
-              "actualaddress": "localhost",
-              "user": "frogbot",
-              "realname": "frogbot",
-              "server": "localhost",
-              "nick": "MyNewFrogBot",
-              "channels": ["#test"],
-              "admins": ["Red_M"],
-              "superadmins": ["Red_M"],
-              "owner": "Red_M",
-              "reportchan": "#frog",
-              "restartcmd": "bot.py",
-              "bots": [],
-              "ftp_host": "",
-              "ftp_port": 21,
-              "ftp_user": "",
-              "ftp_pw": "",
-              "ftp_dir": "",
-              "ignore": [],
-              "twitterfeedchans": ["local irc":[]],
-              "rss-on": "True"
-            }
-          },
-          "disabled_plugins": [],
-          "disabled_commands": [],
-          "acls": {},
-          "api_keys": 
-          {
-            "geoip": "INSERT API KEY FROM ipinfodb.com HERE",
-            "tvdb": "INSERT API KEY FROM thetvdb.com HERE",
-            "bitly_user": "INSERT USERNAME FROM bitly.com HERE",
-            "bitly_api": "INSERT API KEY FROM bitly.com HERE",
-            "adfly_usernumber": "INSERT USER NUMBER KEY FROM adf.ly HERE",
-            "adfly_api": "INSERT API KEY FROM adf.ly HERE",
-            "wolframalpha": "INSERT API KEY FROM wolframalpha.com HERE",
-            "lastfm": "INSERT API KEY FROM lastfm HERE",
-            "mc_user": "INSERT MINECRAFT USERNAME HERE",
-            "mc_pass": "INSERT MINECRAFT PASSWORD HERE",
-			"google": "INSERT API KEY FROM GOOGLE.COM HERE"
-          },
-          "log": "true",
-          "censored_strings":
-          [
-            "DCC SEND",
-            "1nj3ct",
-            "thewrestlinggame",
-            "startkeylogger",
-            "hybux",
-            "\\0",
-            "\\x01",
-            "!coz",
-            "!tell /x"
-          ]
-        }''') + '\n')
+r'''{
+ "acls": {}, 
+ "api_keys": {
+  "adfly_api": "INSERT API KEY FROM adf.ly HERE", 
+  "adfly_usernumber": "INSERT ACCOUNT NUMBER FROM adf.ly HERE", 
+  "bitly_api": "INSERT API KEY FROM bit.ly HERE", 
+  "bitly_user": "INSERT USERNAME FROM bit.ly HERE", 
+  "geoip": "INSERT API KEY FROM ipinfodb.com HERE", 
+  "google": "INSERT API KEY FROM google.com HERE", 
+  "lastfm": "INSERT API KEY FROM lastfm HERE", 
+  "mc_pass": "INSERT MINECRAFT PASSWORD HERE", 
+  "mc_user": "INSERT MINECRAFT USERNAME HERE", 
+  "tvdb": "INSERT API KEY FROM thetvdb.com HERE", 
+  "wolframalpha": "INSERT API KEY FROM wolframalpha.com HERE"
+ }, 
+ "censored_strings": [
+  "DCC SEND", 
+  "1nj3ct", 
+  "thewrestlinggame", 
+  "startkeylogger", 
+  "hybux", 
+  "\\0", 
+  "\\x01", 
+  "!coz", 
+  "!tell /x"
+ ], 
+ "connections": {
+  "local irc": {
+   "actualaddress": "", 
+   "admins": [], 
+   "autotile": true, 
+   "bots": [], 
+   "bouncer-server": false, 
+   "channels": [], 
+   "ftp_dir": "", 
+   "ftp_host": "", 
+   "ftp_port": 21, 
+   "ftp_pw": "", 
+   "ftp_user": "", 
+   "ignore": [], 
+   "nick": "MyNewFrogBot", 
+   "nickserv_password": "", 
+   "owner": "Red_M", 
+   "port": 6667, 
+   "realname": "frog", 
+   "reportchan": "#frog", 
+   "rss-on": true, 
+   "server": "aperture.esper.net", 
+   "server_password": "", 
+   "ssl": false, 
+   "superadmins": ["Red_M"], 
+   "twitterfeedchans": {}, 
+   "user": "frog"
+  }
+ }, 
+ "disabled_commands": [], 
+ "disabled_plugins": [], 
+ "log": "true", 
+ "restartcmd": "bot.py"
+}''') + '\n')
 
 if not os.path.exists('./plugins/web/variables.vars'):
     open('./plugins/web/variables.vars', 'w').write(inspect.cleandoc(r''''''))

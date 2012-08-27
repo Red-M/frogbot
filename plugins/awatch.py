@@ -15,25 +15,25 @@ def awatch(bot, input, func, kind, args):
     if kind=="command" and not perm.isowner(input) and not input.lastparam.startswith(cmdign) and not input.lastparam.startswith(cmdign2):
         cmdused = input.trigger
         if input.lastparam==",stfu" or input.lastparam==",ignore":
-            input.conn.send("PRIVMSG "+repchan+" :I have been muted in "+input.chan+" by "+nickf)
+            input.conn.send("PRIVMSG "+repchan+" :I have been muted in "+input.chan+" by "+nickf+input.mask)
         if input.lastparam==",kthx" or input.lastparam==",listen":
-            input.conn.send("PRIVMSG "+repchan+" :I have been unmuted in "+input.chan+" by "+nickf)
+            input.conn.send("PRIVMSG "+repchan+" :I have been unmuted in "+input.chan+" by "+nickf+input.mask)
         if input.lastparam==",join":
-            input.conn.send("PRIVMSG "+repchan+" :I have joined "+input.chan+" as told to by "+nickf)
+            input.conn.send("PRIVMSG "+repchan+" :I have joined "+input.chan+" as told to by "+nickf+input.mask)
         if input.lastparam==",part" or input.lastparam==",gtfo":
-            input.conn.send("PRIVMSG "+repchan+" :I have left "+input.chan+" as told to by "+nickf)
+            input.conn.send("PRIVMSG "+repchan+" :I have left "+input.chan+" as told to by "+nickf+input.mask)
         if input.chan==input.nick and not perm.isowner(input) and cmdused in cmduse and not input.lastparam.startswith(cmdign):#cmd use in a private msg
-            input.conn.send("PRIVMSG "+repchan+" :"+nickf+" (used/try to use) "+input.lastparam+" in a private message.")
+            input.conn.send("PRIVMSG "+repchan+" :"+nickf+input.mask+" (used/tried to use) "+input.lastparam+" in a private message.")
         if input.chan.startswith("#") and not input.chan==repchan and not perm.isowner(input) and cmdused in cmduse and  not input.lastparam.startswith(cmdign):#cmd use in a channel
-            input.conn.send("PRIVMSG "+repchan+" :"+nickf+" (used/try to use) "+input.lastparam+" in "+input.chan)
+            input.conn.send("PRIVMSG "+repchan+" :"+nickf+input.mask+" (used/tried to use) "+input.lastparam+" in "+input.chan)
         if input.chan==repchan and not perm.isowner(input) and cmdused in cmduse and not input.lastparam.startswith(cmdign):#cmd use in the report chan which is sent back to the owner.
-            input.conn.send("PRIVMSG "+ignorenick+" :"+input.nick+" (used/try to use) "+input.lastparam+" in "+repchan)
+            input.conn.send("PRIVMSG "+ignorenick+" :"+input.nick+input.mask+" (used/tried to use) "+input.lastparam+" in "+repchan)
     elif (not perm.isowner(input)) and ((input.lastparam.startswith("?") and not input.lastparam=="?") or (input.lastparam.startswith("!") and not input.lastparam=="!")):
         if (input.command=="PRIVMSG" and not input.lastparam in cmduse):
             if input.chan==input.nick and not perm.isowner(input):#factoids in a privmsg
-                input.conn.send("PRIVMSG "+repchan+" :"+nickf+" asked me "+input.lastparam+" in a private message.")
+                input.conn.send("PRIVMSG "+repchan+" :"+nickf+input.mask+" asked me "+input.lastparam+" in a private message.")
         elif not input.lastparam.startswith(cmdign):
-            input.conn.send("PRIVMSG "+repchan+" :"+nickf+" asked me "+input.lastparam+" in "+input.chan)
+            input.conn.send("PRIVMSG "+repchan+" :"+nickf+input.mask+" asked me "+input.lastparam+" in "+input.chan)
     return input
 
 

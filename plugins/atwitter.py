@@ -55,21 +55,21 @@ def get_listtwitter(inp):
 
 @hook.command("twitterfeed")
 @hook.command
-def tfeed(inp, input=None, bot=None, db_twitter=None):
+def tfeed(inp, input=None, bot=None, db_global=None):
     "auto tweet getter. ,tfeed <twitter-name-without-@-at-the-start>"
-    db_twitter.execute("create table if not exists twitterfeeds(user, tweet)")
-    db_twitter.commit()
+    db_global.execute("create table if not exists twitterfeeds(user, tweet)")
+    db_global.commit()
     i=0
     feed = input.inp
-    if perm.isadmin(input) and not input.inp=='' and input.conn.conf["rss-on"]=="True":
+    if perm.isadmin(input) and not input.inp=='' and input.conn.conf["rss-on"]==True:
         testss = True
         for xcon in bot.conns:
             if feed not in bot.conns[xcon].conf["twitterfeedchans"]:
                 bot.conns[xcon].conf["twitterfeedchans"][feed]=[]
-                db_twitter.execute("insert or replace into twitterfeeds(user, tweet) values (?,?)",(feed, "none"))
+                db_global.execute("insert or replace into twitterfeeds(user, tweet) values (?,?)",(feed, "none"))
             if bot.conns[xcon].conf["twitterfeedchans"][feed].count(bot.conns[xcon].conf["reportchan"])==0:
                 bot.conns[xcon].conf["twitterfeedchans"][feed].append(bot.conns[xcon].conf["reportchan"])
-        lasttweet = ''.join(db_twitter.execute("select tweet from twitterfeeds where user=(?)",(feed,)).fetchone())
+        lasttweet = ''.join(db_global.execute("select tweet from twitterfeeds where user=(?)",(feed,)).fetchone())
         input.say("Done. following "+feed)
         ttl=75
         bot.twitterlist[feed]=True
@@ -110,9 +110,9 @@ def tfeed(inp, input=None, bot=None, db_twitter=None):
                             bot.conns[xcon].send('PRIVMSG '+channels+' :TWITTER FEED: '+tweet)
                 lasttweet=tweet
                 ttl=75
-                db_twitter.execute("delete from twitterfeeds where user=(?)", (feed,)).rowcount
-                db_twitter.execute("insert or replace into twitterfeeds(user, tweet) values (?,?)",(feed, tweet))
-                db_twitter.commit()
+                db_global.execute("delete from twitterfeeds where user=(?)", (feed,)).rowcount
+                db_global.execute("insert or replace into twitterfeeds(user, tweet) values (?,?)",(feed, tweet))
+                db_global.commit()
                 i=0
                 time.sleep(ttl)
                 testss = True
@@ -121,26 +121,26 @@ def tfeed(inp, input=None, bot=None, db_twitter=None):
 
 @hook.command("twitterlistfeed")
 @hook.command
-def tlfeed(inp, input=None, bot=None, db_twitter=None):
+def tlfeed(inp, input=None, bot=None, db_global=None):
     "auto twitter list tweet getter. ,tlfeed <twitter-list-name> <owner of list without @ at the start>"
-    db_twitter.execute("create table if not exists twitterlistfeeds(list, tweet)")
-    db_twitter.commit()
+    db_global.execute("create table if not exists twitterlistfeeds(list, tweet)")
+    db_global.commit()
     i=0
     check = input.inp.split(' ') 
     feed = str(get_listid(check[0],check[1]))
     feedname = check[0]
-    if perm.isadmin(input) and not input.inp=='' and input.conn.conf["rss-on"]=="True":
+    if perm.isadmin(input) and not input.inp=='' and input.conn.conf["rss-on"]==True:
         testss = True
         for xcon in bot.conns:
             if feedname not in bot.conns[xcon].conf["twitterfeedchans"]:
                 bot.conns[xcon].conf["twitterfeedchans"][feedname]=[]
-                db_twitter.execute("insert into twitterlistfeeds(list, tweet) values (?,?)",(feedname, "nothing..."))
+                db_global.execute("insert into twitterlistfeeds(list, tweet) values (?,?)",(feedname, "nothing..."))
             if bot.conns[xcon].conf["twitterfeedchans"][feedname].count(bot.conns[xcon].conf["reportchan"])==0:
                 bot.conns[xcon].conf["twitterfeedchans"][feedname].append(bot.conns[xcon].conf["reportchan"])
-        if db_twitter.execute("select tweet from twitterlistfeeds where list=(?)",(feedname,)).fetchone()==None:
+        if db_global.execute("select tweet from twitterlistfeeds where list=(?)",(feedname,)).fetchone()==None:
             lasttweet="nothing..."
-        if not db_twitter.execute("select tweet from twitterlistfeeds where list=(?)",(feedname,)).fetchone()==None:
-            lasttweet=''.join(db_twitter.execute("select tweet from twitterlistfeeds where list=(?)",(feedname,)).fetchone())
+        if not db_global.execute("select tweet from twitterlistfeeds where list=(?)",(feedname,)).fetchone()==None:
+            lasttweet=''.join(db_global.execute("select tweet from twitterlistfeeds where list=(?)",(feedname,)).fetchone())
         input.say("Done. following "+feedname)
         ttl=75
         bot.twitterlists[feedname]=True
@@ -180,9 +180,9 @@ def tlfeed(inp, input=None, bot=None, db_twitter=None):
                         bot.conns[xcon].send('PRIVMSG '+channels+' :TWITTER LIST FEED:'+feedname+': '+tweet)
                 lasttweet=tweet
                 bot.twitterlists[feedname]=True
-                db_twitter.execute("delete from twitterlistfeeds where list=(?)", (feedname,)).rowcount
-                db_twitter.execute("insert or replace into twitterlistfeeds(list, tweet) values (?,?)",(feedname, tweet))
-                db_twitter.commit()
+                db_global.execute("delete from twitterlistfeeds where list=(?)", (feedname,)).rowcount
+                db_global.execute("insert or replace into twitterlistfeeds(list, tweet) values (?,?)",(feedname, tweet))
+                db_global.commit()
                 ttl=75
                 i=0
                 time.sleep(ttl)

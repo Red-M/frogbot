@@ -2,7 +2,7 @@ import thread
 import traceback
 
 
-thread.stack_size(256* 256)  # reduce vm size
+thread.stack_size(1024 * 512)  # reduce vm size
 
 
 class Input(dict):
@@ -58,12 +58,8 @@ def run(func, input):
     if args:
         if 'db' in args and 'db' not in input:
             input.db = get_db_connection(input.conn)
-        if 'db_auth' in args and 'db_auth' not in input:
-            input.db_auth = get_db_connection_auth()
-        if 'db_twitter' in args and 'db_twitter' not in input:
-            input.db_twitter = get_db_connection_twitter()
-        if 'db_seen' in args and 'db_seen' not in input:
-            input.db_seen = get_db_connection_seen()
+        if 'db_global' in args and 'db_global' not in input:
+            input.db_global = get_db_connection_global()
         if 'input' in args:
             input.input = input
         if 0 in args:

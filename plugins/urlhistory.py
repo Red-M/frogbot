@@ -50,7 +50,7 @@ def format_reply(history):
     return "that url has been posted %s in the past %s by %s (%s)." % (ordinal,
             hour_span, nicklist(history), last)
 
-@hook.regex(url_re)
+#@hook.regex(url_re)
 def urlinput(match, nick='', chan='', db=None, bot=None):
     if "autoreply" in bot.config and not bot.config["autoreply"]:
         return

@@ -6,8 +6,10 @@ from util import hook
 
 @hook.command
 def choose(inp):
-    ".choose <choice1>, <choice2>, ... <choicen> -- makes a decision"
+    ",choose <choice1>, <choice2>, ... <choicen> -- makes a decision"
 
+    if inp=="":
+        return(",choose <choice1>, <choice2>, ... <choicen> -- makes a decision")
     c = re.findall(r'([^,]+)', inp)
     if len(c) == 1:
         c = re.findall(r'(\S+)', inp)

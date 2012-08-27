@@ -56,7 +56,7 @@ def match_language(fragment):
     return None
 
 
-@hook.command
+#@hook.command
 def translate(inp):
     '.translate [source language [target language]] <sentence> -- translates' \
     ' <sentence> from source language (default autodetect) to target' \
@@ -93,7 +93,7 @@ def babel_gen(inp):
         yield language, trans, inp
 
 
-#@hook.command
+@hook.command
 def babel(inp):
     ".babel <sentence> -- translates <sentence> through multiple languages"
 
@@ -103,7 +103,7 @@ def babel(inp):
         return e
 
 
-#@hook.command
+@hook.command
 def babelext(inp):
     ".babelext <sentence> -- like .babel, but with more detailed output"
 

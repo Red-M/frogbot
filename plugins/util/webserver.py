@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import cherrypy
 import os
 import time
@@ -18,13 +17,15 @@ if os.name == 'nt':
     
 import sqlite3
 if os.name == 'posix':
-    persdir = current_dir.replace("/plugins/web/server.py","/persist")
+    persdir = current_dir.replace("/plugins/util","/persist")
 if os.name == 'nt':
-    persdir = current_dir.replace("\\plugins\\web\\server.py","\\persist")
+    persdir = current_dir.replace("\\plugins"+"\\"+"util","\\"+"persist")
+
 def get_db_connection(ourdir,name):
     "returns an sqlite3 connection to a persistent database"
     filename = os.path.join(ourdir, name)
     return sqlite3.connect(filename, timeout=10)
+
 def factoidrefresh(persdir):
     list = dircache.listdir(persdir)
     list2=[]
@@ -36,7 +37,8 @@ def factoidrefresh(persdir):
         if str(file).endswith(".db"):
             x=x+1
             list2.append(str(file))
-    list2.remove("global.db")
+    if "global.db" in list2:
+        list2.remove("global.db")
     for file in list2:
         factoiddb[file] = get_db_connection(persdir,file)
         testone[file] = factoiddb[file].execute("SELECT * FROM memory where chan=(?)",("Red_M",)).fetchall()
@@ -44,6 +46,7 @@ def factoidrefresh(persdir):
         for data in testone[file]:
             (chan,word,wordata,wordnick) = data
             table[file].append('<td align="left" style="width:10%">?'+word.replace('>', '&gt;').replace('<', '&lt;')+"</td>\n    "+'<td align="left" style="width:80%"><div style="word-wrap: break-word;">'+wordata.replace('>', '&gt;').replace('<', '&lt;')+"</div></td>\n    "+'<td align="left" style="width:10%">'+wordnick+"</td>")
+        factoiddb[file].close()
     return table
         
 def serve_template(tmpl, **kwargs):
@@ -91,7 +94,7 @@ class FactoidsPage:
     def index(self):
         input = client("127.0.0.1",4329,"requesting bot variable data " \
         "refreshment. please respond.")
-        word = factoidrefresh(current_dir.replace("/plugins/web","/persist")) # 
+        word = factoidrefresh(persdir)
         return serve_template("factoids.mako", title="Factoids", nick=input['nick'], word=word)
         
         
@@ -164,5 +167,5 @@ def web_init():
     }
     cherrypy.config.update(global_conf)
     web_interface = WebInterface()
+    print("Web server started")
     cherrypy.quickstart(web_interface, '/', config = application_conf)
-web_init()

@@ -13,7 +13,7 @@ def trigger(func):
 
 @trigger
 def on_eat(match, input=None, **kw):
-    r' eats\s+(?P<whom>\S+)'
+    r'eats\s+(?P<whom>\S+)'
 
     if match.group("whom").lower() == input.conn.nick.lower():
         reply = random.choice((

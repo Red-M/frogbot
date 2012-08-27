@@ -8,14 +8,14 @@ def db_init(db):
     db.commit()
 
 @hook.command
-def seen(inp, nick='', chan='', db_seen=None, input=None):
+def seen(inp, nick='', chan='', db=None, input=None):
     ",seen <nick> -- Tell when a nickname was last in active in irc"
     if input.conn.nick.lower() == inp.lower():
         return("I'm right here, need something?")
     if inp.lower() == nick.lower():
         return("Yes, that's your nick ...")
-    db_init(db_seen)
-    last_seen = db_seen.execute("select name, said, time, chan from seen where name=lower(?)", (inp,)).fetchone()
+    db_init(db)
+    last_seen = db.execute("select name, said, time, chan from seen where name=lower(?)", (inp,)).fetchone()
     if last_seen:
         reltime = timesince.timesince(last_seen[2])
         if last_seen[0] != inp.lower():  # for glob matching
