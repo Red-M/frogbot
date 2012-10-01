@@ -42,6 +42,7 @@ if not hasattr(bot, 'config'):
 print 'Connecting to IRC'
 
 bot.conns = {}
+bot.cooldown = {}
 bot.auth = {}
 bot.seen = {}
 bot.chanseen = {}
@@ -66,6 +67,7 @@ except Exception, e:
     sys.exit()
 
 for xcon in bot.conns:
+    bot.cooldown[str(xcon)]={}
     bot.auth[str(bot.conns[xcon].server)]={}
     bot.auth[str(bot.conns[xcon].server)]["owner"]={}
     bot.auth[str(bot.conns[xcon].server)]["superadmin"]={}
@@ -76,7 +78,6 @@ for xcon in bot.conns:
     bot.chanseen[str(bot.conns[xcon].server)]={}
     for channels in bot.conns[xcon].conf["channels"]:
         bot.chanseen[str(bot.conns[xcon].server)][channels]=["start-up"]
-
         
 bot.persist_dir = os.path.abspath('persist')
 bot.logs_dir = os.path.abspath('logs')

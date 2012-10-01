@@ -30,15 +30,17 @@ nextresponsenumber = -1
 @hook.command
 @hook.command("8ball")
 def eightball(inp, say=None):
-    ".8ball <question> - ask the 8ball a question"
+    ",8ball <question> - ask the 8ball a question"
     global nextresponsenumber
     inp = inp.strip()
+    if inp=="":
+        return(",8ball <question> - ask the 8ball a question")
     if re.match("[a-zA-Z0-9]", inp[-1]):
         inp += "?"
     if nextresponsenumber > 0:
         nextresponsenumber = -1
-        return inp + " " + answers[nextresponsenumber]
-    return inp + " " + random.choice(answers)
+        return '"' + inp + '" -- ' + answers[nextresponsenumber]
+    return '"' + inp + '" -- ' + random.choice(answers)
 
 
 @hook.command("8ballnooxt")

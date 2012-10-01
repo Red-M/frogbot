@@ -6,23 +6,21 @@ from util import hook, perm, munge
 def sieve_suite(bot, input, func, kind, args):
     inuserhost = input.user+'@'+input.host
     ignored = input.conn.conf['ignore']
-    if input.nick in input.conn.conf['owner'] and input.conn.conf['superadmins'].count(input.nick)==0 and input.conn.conf['admins'].count(input.nick)==0:
-        input.conn.conf['superadmins'].append(input.nick)
-        input.conn.conf['admins'].append(input.nick)
-    if inuserhost in input.conn.conf['owner'] and input.conn.conf['superadmins'].count(inuserhost)==0 and input.conn.conf['admins'].count(inuserhost)==0:
-        input.conn.conf['superadmins'].append(inuserhost)
-        input.conn.conf['admins'].append(inuserhost)
-    if input.nick in input.conn.conf['superadmins'] and input.conn.conf['admins'].count(input.nick)==0:
-        input.conn.conf['admins'].append(input.nick)
-    if inuserhost in input.conn.conf['superadmins'] and input.conn.conf['admins'].count(inuserhost)==0:
-        input.conn.conf['admins'].append(inuserhost)
     if kind == "command":
         if "^" in input.paraml[1]:
             input.inp.replace("^",bot.chanseen[input.conn.server][input.chan][0])
             input.paraml[1].replace("^",bot.chanseen[input.conn.server][input.chan][0])
         if input.trigger in bot.config["disabled_commands"]:
             return None
-
+    
+    connitem = input.conn
+    for xconn in bot.conns:
+        if connitem==bot.conns[xconn]:
+            server=xconn
+    if input.nick in bot.cooldown[str(server)]:
+        bot.cooldown[str(server)][input.nick]+=1
+        return None
+    
     if input.paraml[0].startswith("\x01PING "):
 		input.conn.send("NOTICE "+input.nick+" :"+input.inp[1])
 
@@ -40,9 +38,9 @@ def sieve_suite(bot, input, func, kind, args):
             denied_channels = map(unicode.lower, acl['allow-except'])
             if input.chan.lower() in denied_channels:
                 return None
-
+    #print input.trigger
     if (perm.isignored(input) or perm.isbot(input)):
-        if not (perm.isadmin(input) and kind=="event" and ("NICK" in args["events"])):
+        if ((not perm.isadmin(input)) and (kind=="event") and ("NICK" in args["events"])) or (input.paraml[0].startswith("\x01ACTION ")) or (input.chan in input.conn.conf["ignore"]):
             return None
         else:
             return input
@@ -60,7 +58,28 @@ def sieve_suite(bot, input, func, kind, args):
         if not perm.isowner(input):
             return None
 #extended permissions end here.
-    return input
+    return input 
+    
+@hook.event('PRIVMSG')
+def cmdcooldown(inp,input=None,bot=None):
+    wait=False
+    connitem = input.conn
+    for xconn in bot.conns:
+        if connitem==bot.conns[xconn]:
+            server=xconn
+    if input.nick in bot.cooldown[str(server)]:
+        bot.cooldown[str(server)][input.nick]+=20
+    if ((not perm.isadmin(input)) and (not input.nick in bot.cooldown[str(server)]) and (not input.nick=="") and (input.inp[1].startswith(",") or input.inp[1].startswith("?") or input.inp[1].startswith("!")) and (not input.nick==input.conn.conf["nick"])):
+        bot.cooldown[str(server)][input.nick]=15
+        time.sleep(0.5)
+        wait=True
+    while wait==True:
+        if bot.cooldown[str(server)][input.nick]<1:
+            del bot.cooldown[str(server)][input.nick]
+            wait=False
+        else:
+            bot.cooldown[str(server)][input.nick]+=-1
+            time.sleep(1)
     
 def db_init(db):
     db.execute("create table if not exists seen(name, said, time, chan)")

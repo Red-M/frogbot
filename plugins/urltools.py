@@ -108,7 +108,12 @@ def urltest(url,match):
 @hook.regex(r'((?#Protocol)(?:(?:ht|f)tp(?:s?)\:\/\/|~\/|\/)?P<id>?(?#Username:Password)(?:\w+:\w+@)?(?#Subdomains)(?:(?:[-\w]+\.)+(?#TopLevel Domains)(?:com|org|net|gov|mil|biz|info|mobi|name|aero|jobs|museum|travel|[a-z]{2}))(?#Port)(?::[\d]{1,5})?(?#Directories)(?:(?:(?:\/(?:[-\w~!$+|.,=]|%[a-f\d]{2})+)+|\/)+|\?|#)?(?#Query)(?:(?:\?(?:[-\w~!$+|.,*:]|%[a-f\d{2}])+=?(?:[-\w~!$+|.,*:=]|%[a-f\d]{2})*)(?:&(?:[-\w~!$+|.,*:]|%[a-f\d{2}])+=?(?:[-\w~!$+|.,*:=]|%[a-f\d]{2})*)*)*(?#Anchor)(?:#(?:[-\w~!$+|.,*:=]|%[a-f\d]{2})*)?$|([a-zA-Z]+://|www\.)[^ ]+)')
 def urlparser(match, say = None, input=None, bot=None):
     inpo = input.params.replace(input.chan+" :","")
-    url = urlnorm.normalize(match.group().encode('utf-8'))
+    url = match.group().encode('utf-8')
+    regexs = re.compile(r"(.+?)(\'|\"|\(|\)|\{|\}|\]|\[|\<|\>)")
+    matchs = regexs.search(url)
+    if matchs:
+        url = matchs.group(0).replace(matchs.group(0)[-1:],"")
+    url = urlnorm.normalize(url)
     url2 = urltest(url,match)
     if (not input.conn.conf['autotitle']==False) and (not (perm.isignored(input) or perm.isbot(input))) and not (inpo.startswith(",t") or inpo.startswith(",title") or inpo.startswith(",shor")) and not ("@" in url):
         #print "[debug] URL found"
@@ -122,7 +127,11 @@ def urlparser(match, say = None, input=None, bot=None):
             print "[url] No title found"
             return("(Link) No title found")
         title = multiwordReplace(title, wordDic)
-        realurl = http.get_url(url)
+        try:
+            realurl = http.get_url(url)
+        except Exception, msg:
+            print(msg)
+            return
         api_user = bot.config.get("api_keys", {}).get("bitly_user", None)
         api_key = bot.config.get("api_keys", {}).get("bitly_api", None)
         if api_key is None:

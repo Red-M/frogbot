@@ -12,7 +12,6 @@
 	
 <!-- Le styles (compiled server-side with less) -->
 <link href="/static/bootstrap.min.css" rel="stylesheet" type="text/css">
-<link href="/static/style.css" rel="stylesheet" type="text/css">
 <style type="text/css">
   body {
    padding-top: 55px;

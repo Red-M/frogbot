@@ -37,8 +37,7 @@ def isbot(input):
         regex = re.compile(data.replace("*",".*"))
         match = regex.search(inuserhost)
         i=i+1
-        if (match and input.nick not in input.conn.conf["admins"]) \
-        or (input.chan in input.conn.conf["bots"]):
+        if (match and input.nick not in input.conn.conf["admins"]):
             return True
         else:
             if not match and len(input.conn.conf["bots"])==i:
@@ -49,7 +48,7 @@ def isignored(input):
     list=[]
     i=0
     for data in input.conn.conf["ignore"]:
-        if input.chan in input.conn.conf["ignore"] and (input.nick not in input.conn.conf["admins"]):
+        if (input.chan in input.conn.conf["ignore"]) and (input.nick not in input.conn.conf["admins"]):
             return True
         else:
             if input.nick not in input.conn.conf["admins"]:

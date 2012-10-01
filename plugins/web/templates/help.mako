@@ -14,9 +14,9 @@
       </div>
       <div class="row">
           <h2>Help</h2>
-           <p>This FrogBot should display extra information on a command when ",help <command>" is used. Also using ",help" will display all the commands the bot has.</p>
-           <p>If the command you asked for does not work or you recieve the reply "Nope.avi" then you either are not high enough in this bot's permissions to us this command or you did something wrong...</p>
-           <p>Some commands may not have any help information from ",help <command>" because the command not have any yet...</p>
+           <p>This FrogBot should display extra information on a command when ",help <command>" is used. Also using ",help" by itself will display all the commands the bot has.</p>
+           <p>If the command you asked for does not work or you recieve the reply "Nope.avi" then you either are not high enough in this bot's permissions to use this command or you did something wrong...</p>
+           <p>Some commands may not have any help information from ",help <command>" because the command may not have any yet...</p>
       </div>
       <hr>
       <footer>

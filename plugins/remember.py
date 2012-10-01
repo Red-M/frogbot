@@ -318,24 +318,26 @@ def question(inp, chan='', say=None, db=None, input=None, nick="", me=None, bot=
         "returns (mode, word, args, redir, redirto)"
         ret = []
         wordmatch = word_re.search(words)
-        words = words[wordmatch.end():]
-        ret.append(wordmatch.group(1))
-        ret.append(wordmatch.group(2).lower())
+        if not wordmatch==None:
+            words = words[wordmatch.end():]
+            ret.append(wordmatch.group(1))
+            ret.append(wordmatch.group(2).lower())
 
-        redirect = ''
-        redirectto = ''
-        redirectmatch = redirect_re.search(words)
-        if redirectmatch:
-            redirect = redirectmatch.group(1)
-            redirectto = redirectmatch.group(2)
-            words = words[:redirectmatch.start()]
-        ret.append(words.strip())
-        ret.append(redirect)
-        ret.append(redirectto)
-        return ret
-
+            redirect = ''
+            redirectto = ''
+            redirectmatch = redirect_re.search(words)
+            if redirectmatch:
+                redirect = redirectmatch.group(1)
+                redirectto = redirectmatch.group(2)
+                words = words[:redirectmatch.start()]
+            ret.append(words.strip())
+            ret.append(redirect)
+            ret.append(redirectto)
+            return ret
+        else:
+            return ('/', '/', '/', '/', '/') #lets just fill it with stuff so we can exit out if we cant get a word for cases like "? <stuff>"
     (mode, word, args, redir, redirto) = splitgroups(groups[0])
-    if "/" in word:
+    if ("/" in word) or (word==None):
         return
 
 

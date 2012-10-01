@@ -30,7 +30,7 @@ def cycle(inp, input=None, db=None, notice=None):
         return
     notice("Attempting to cycle %s..." % (inp))
     input.conn.send("PART %s" % (inp))
-    input.conn.send("JOIN " % (inp))
+    input.conn.send("JOIN %s" % (inp))
 
 @hook.command
 def part(inp, input=None, notice=None, bot=None):

@@ -69,9 +69,6 @@ r'''{
  "restartcmd": "bot.py"
 }''') + '\n')
 
-if not os.path.exists('./plugins/web/variables.vars'):
-    open('./plugins/web/variables.vars', 'w').write(inspect.cleandoc(r''''''))
-
 
 def config():
     # reload config from file if file has changed
