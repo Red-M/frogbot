@@ -36,7 +36,7 @@ def cheval(inp, bot=None, input=None, nick=None, db=None, chan=None):
     try:
         if '^' in input.paraml[1]:
             inp = str(inp).replace("^", \
-                            bot.chanseen[input.conn.server][input.chan][0])
+                            bot.chanseen[input.conn.name][input.chan][0])
         inpss = "input.say(str("+inp+"))"
         blocked = ["sys.stdout",".connect",'.send',
         "bot.conns[",".conf",".config",".clear",".kill",

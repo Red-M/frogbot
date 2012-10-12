@@ -19,8 +19,8 @@ def authenticate(inp, input=None, db_global=None, bot=None, conn=None):
         return(out)
     if len(check)==2 and check[0]=="logout":
         groupcheck=''.join(str(db_global.execute("select groups from auth where user=(?)",(check[1],)).fetchone()[0]))
-        if input.nick in bot.auth[str(conn.server)][groupcheck]:
-            del bot.auth[str(conn.server)][groupcheck][str(input.nick)]
+        if input.nick in bot.auth[str(conn.name)][groupcheck]:
+            del bot.auth[str(conn.name)][groupcheck][str(input.nick)]
             return "Bye!"
     if len(check)>=3:
         cmdlist=["login",'groupset','set','reset']
@@ -46,7 +46,7 @@ def authenticate(inp, input=None, db_global=None, bot=None, conn=None):
             hashcheck=hashlib.sha512(check[2]).hexdigest()
             if usercheck==check[1] and passcheck==hashcheck:
                 print(groupcheck)#if groupcheck==None
-                bot.auth[str(conn.server)][groupcheck][str(input.nick)]={}
+                bot.auth[str(conn.name)][groupcheck][str(input.nick)]={}
                 return("welcome back "+check[1]+" have a nice time.")
             else:
                 return("incorrect password or username. please try again.")
@@ -55,8 +55,8 @@ def authenticate(inp, input=None, db_global=None, bot=None, conn=None):
                 db_global.execute("delete from auth where user=(?)", (check[1],)).rowcount
                 db_global.execute("insert or replace into auth(user, pass, groups) values (?,?,?)",(check[1], passcheck,check[2]))
                 db_global.commit()
-                del bot.auth[str(conn.server)][groupcheck][str(input.nick)]
-                bot.auth[str(conn.server)][check[2]][str(input.nick)]={}
+                del bot.auth[str(conn.name)][groupcheck][str(input.nick)]
+                bot.auth[str(conn.name)][check[2]][str(input.nick)]={}
                 return("done. group set to "+check[2])
             else:
                 return("user not found or group not found.")
@@ -97,14 +97,14 @@ def userigntrack(old,new,input,bot):
 
 def usernick(old,new,conn,bot):
     for groupcheck in groupscheck:
-        if old in bot.auth[str(conn.server)][groupcheck]:
-            bot.auth[str(conn.server)][groupcheck][str(new)]={}
-            del bot.auth[str(conn.server)][groupcheck][str(old)]
+        if old in bot.auth[str(conn.name)][groupcheck]:
+            bot.auth[str(conn.name)][groupcheck][str(new)]={}
+            del bot.auth[str(conn.name)][groupcheck][str(old)]
             
 def userquit(nick,conn,bot):
     for groupcheck in groupscheck:
-        if nick in bot.auth[str(conn.server)][groupcheck]:
-            del bot.auth[str(conn.server)][groupcheck][str(nick)]
+        if nick in bot.auth[str(conn.name)][groupcheck]:
+            del bot.auth[str(conn.name)][groupcheck][str(nick)]
 
 @hook.event("JOIN KICK QUIT NICK")
 @hook.singlethread

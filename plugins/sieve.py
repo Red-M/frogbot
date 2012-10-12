@@ -8,15 +8,15 @@ def sieve_suite(bot, input, func, kind, args):
     ignored = input.conn.conf['ignore']
     if kind == "command":
         if "^" in input.paraml[1]:
-            input.inp.replace("^",bot.chanseen[input.conn.server][input.chan][0])
-            input.paraml[1].replace("^",bot.chanseen[input.conn.server][input.chan][0])
+            input.inp.replace("^",bot.chanseen[input.conn.name][input.chan][0])
+            input.paraml[1].replace("^",bot.chanseen[input.conn.name][input.chan][0])
         if input.trigger in bot.config["disabled_commands"]:
             return None
     
     connitem = input.conn
     for xconn in bot.conns:
         if connitem==bot.conns[xconn]:
-            server=xconn
+            server=bot.conns[xconn].name
     if input.nick in bot.cooldown[str(server)]:
         bot.cooldown[str(server)][input.nick]+=1
         return None

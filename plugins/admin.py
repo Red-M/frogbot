@@ -45,7 +45,7 @@ def part(inp, input=None, notice=None, bot=None):
         json.dump(bot.config, open('config', 'w'), sort_keys=True, indent=1)
         return"Done."
 
-@hook.command
+#@hook.command disbaled by default due to derpy-ness
 def nick(inp, input=None, notice=None):
     ".nick <nick> -- change the bots nickname to <nick>"
     if not perm.isowner(input):

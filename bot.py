@@ -49,8 +49,6 @@ bot.chanseen = {}
 bot.twitterlist = {}
 bot.twitterlists = {}
 bot.connected={}
-bot.test={}
-bot.html=0
 bot.path=__file__
 
 try:
@@ -67,17 +65,17 @@ except Exception, e:
     sys.exit()
 
 for xcon in bot.conns:
-    bot.cooldown[str(xcon)]={}
-    bot.auth[str(bot.conns[xcon].server)]={}
-    bot.auth[str(bot.conns[xcon].server)]["owner"]={}
-    bot.auth[str(bot.conns[xcon].server)]["superadmin"]={}
-    bot.auth[str(bot.conns[xcon].server)]["admin"]={}
-    bot.auth[str(bot.conns[xcon].server)]["none"]={}
-    bot.seen[str(bot.conns[xcon].server)]={}
-    bot.connected[str(bot.conns[xcon].server)]=0
-    bot.chanseen[str(bot.conns[xcon].server)]={}
+    bot.cooldown[str(bot.conns[xcon].name)]={}
+    bot.auth[str(bot.conns[xcon].name)]={}
+    bot.auth[str(bot.conns[xcon].name)]["owner"]={}
+    bot.auth[str(bot.conns[xcon].name)]["superadmin"]={}
+    bot.auth[str(bot.conns[xcon].name)]["admin"]={}
+    bot.auth[str(bot.conns[xcon].name)]["none"]={}
+    bot.seen[str(bot.conns[xcon].name)]={}
+    bot.connected[str(bot.conns[xcon].name)]=0
+    bot.chanseen[str(bot.conns[xcon].name)]={}
     for channels in bot.conns[xcon].conf["channels"]:
-        bot.chanseen[str(bot.conns[xcon].server)][channels]=["start-up"]
+        bot.chanseen[str(bot.conns[xcon].name)][channels]=["start-up"]
         
 bot.persist_dir = os.path.abspath('persist')
 bot.logs_dir = os.path.abspath('logs')

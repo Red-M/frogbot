@@ -377,9 +377,9 @@ def question(inp, chan='', say=None, db=None, input=None, nick="", me=None, bot=
     variables["inp"] = unicode(variables["inp"])
     variables["ioru"] = unicode(variables["ioru"])
     if "^" in (variables["inp"]):
-        variables["inp"]=str(variables["inp"]).replace("^",bot.chanseen[input.conn.server][input.chan][0])
+        variables["inp"]=str(variables["inp"]).replace("^",bot.chanseen[input.conn.name][input.chan][0])
     if "^" in (variables["ioru"]):
-        variables["ioru"]=str(variables["ioru"]).replace("^",bot.chanseen[input.conn.server][input.chan][0])
+        variables["ioru"]=str(variables["ioru"]).replace("^",bot.chanseen[input.conn.name][input.chan][0])
     if mode == "-":   # information
         message = word + " is "
         local = db.execute("select nick from memory where chan=? and word=lower(?)", (chan, word)).fetchone()
