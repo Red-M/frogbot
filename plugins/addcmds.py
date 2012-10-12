@@ -73,7 +73,7 @@ def client(ip, port, message):
     finally:
         sock.close()
             
-@hook.command
+#@hook.command    usertracking was removed so this became broken.... meh it was only a testing plugin
 def users(inp, bot=None, input=None):
     if perm.isadmin(input):
         input.say(" ".join(input.conn.users.users))
