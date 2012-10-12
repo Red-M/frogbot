@@ -104,8 +104,10 @@ class Handler(object):
                     db = bot.get_db_connection(input.conn)
                     db_conns[input.conn] = db
                 input.db = db
-
-            run(self.func, input)
+            try:
+                run(self.func, input)
+            except:
+                traceback.print_exc()
 
     def stop(self):
         self.input_queue.put(StopIteration)

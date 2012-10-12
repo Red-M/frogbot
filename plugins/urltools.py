@@ -7,7 +7,7 @@ import urlparse
 import repaste
 import urlhistory
 
-ignored_urls = ["http://youtube.com","https://youtube.com","https://www.youtube.com","http://www.youtube.com","http://pastebin.com","http://www.pastebin.com","http://mibpaste.com","http://fpaste.com"]
+ignored_urls = ["http://youtube.com","http://youtu.be","https://youtube.com","https://www.youtube.com","http://www.youtube.com","http://pastebin.com","http://www.pastebin.com","http://mibpaste.com","http://fpaste.com"]
 maxlen = 4086
 titler = re.compile(r'(?si)<title>(.+?)</title>')
 wordDic = {

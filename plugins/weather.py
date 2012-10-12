@@ -5,7 +5,7 @@ from util import hook, http
 
 @hook.command(autohelp=False)
 def weather(inp, nick='', server='', reply=None, db=None):
-    ".weather <location> [dontsave] -- gets weather data from Google"
+    ",weather <location> [dontsave] -- gets weather data from Google"
 
     loc = inp
 

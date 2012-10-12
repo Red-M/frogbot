@@ -58,10 +58,10 @@ try:
         if conf.get('ssl'):
             bot.conns[name] = SSLIRC(conf['server'], conf['nick'], conf=conf,
                     port=conf.get('port', 6667), channels=conf['channels'],
-                    ignore_certificate_errors=conf.get('ignore_cert', True))
+                    ignore_certificate_errors=conf.get('ignore_cert', True),name=name)
         else:
             bot.conns[name] = IRC(conf['server'], conf['nick'], conf=conf,
-                    port=conf.get('port', 6667), channels=conf['channels'])
+                    port=conf.get('port', 6667), channels=conf['channels'],name=name)
 except Exception, e:
     print 'ERROR: malformed config file', e
     sys.exit()

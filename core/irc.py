@@ -19,13 +19,14 @@ def decode(txt):
 class crlf_tcp(object):
     "Handles tcp connections that consist of utf-8 lines ending with crlf"
 
-    def __init__(self, host, port, timeout=300):
+    def __init__(self, host, port, name, timeout=300):
         self.ibuffer = ""
         self.obuffer = ""
         self.oqueue = Queue.Queue()  # lines to be sent out
         self.iqueue = Queue.Queue()  # lines that were received
         self.socket = self.create_socket()
         self.host = host
+        self.name = name
         self.port = port
         self.timeout = timeout
 
@@ -80,13 +81,13 @@ class crlf_tcp(object):
     def send_loop(self):
         while True:
             line = self.oqueue.get().splitlines()[0][:500]
-            line2 = ("(BOT)::("+self.host+") %r" % line)
+            line2 = ("(BOT)::("+self.name+") %r" % line)
             if unicode(":TWITTER FEED:") in unicode(line):
                 line2 = ("(BOT):: twitter action.")
             if unicode(":TWITTER LIST FEED:") in unicode(line):
                 line2 = ("(BOT):: twitter action.")
             if unicode("PONG :") in unicode(line) or unicode('PONG :') in unicode(line):
-                line2 = ("(BOT)::("+self.host[:7]+") Ping Pong.")
+                line2 = ("(BOT)::("+self.name[:7]+") Ping Pong.")
             if unicode("PING :") in unicode(line) or unicode('PING :') in unicode(line):
                 line2 = ("\0")
             if not line2=="\0":
@@ -99,9 +100,9 @@ class crlf_tcp(object):
 
 class crlf_ssl_tcp(crlf_tcp):
     "Handles ssl tcp connetions that consist of utf-8 lines ending with crlf"
-    def __init__(self, host, port, ignore_cert_errors, timeout=300):
+    def __init__(self, host, port, ignore_cert_errors, name, timeout=300):
         self.ignore_cert_errors = ignore_cert_errors
-        crlf_tcp.__init__(self, host, port, timeout)
+        crlf_tcp.__init__(self, host, port, name, timeout)
 
     def create_socket(self):
         return wrap_socket(crlf_tcp.create_socket(self), server_side=False,
@@ -129,10 +130,11 @@ irc_param_ref = re.compile(r'(?:^|(?<= ))(:.*|[^ ]+)').findall
 class IRC(object):
     "handles the IRC protocol"
     #see the docs/ folder for more information on the protocol
-    def __init__(self, server, nick, port=6667, channels=[], conf={}):
+    def __init__(self, server, nick, port=6667, channels=[], conf={},name=""):
         self.channels = channels
         self.conf = conf
         self.server = server
+        self.name = name
         self.port = port
         self.nick = nick
 
@@ -144,7 +146,7 @@ class IRC(object):
         thread.start_new_thread(self.parse_loop, ())
 
     def create_connection(self):
-        return crlf_tcp(self.server, self.port)
+        return crlf_tcp(self.server, self.port, self.name)
 
     def connect(self):
         self.conn = self.create_connection()
@@ -255,9 +257,9 @@ class FakeIRC(IRC):
 
 class SSLIRC(IRC):
     def __init__(self, server, nick, port=7778, channels=[], conf={},
-                 ignore_certificate_errors=True):
+                 ignore_certificate_errors=True, name=""):
         self.ignore_cert_errors = ignore_certificate_errors
-        IRC.__init__(self, server, nick, port, channels, conf)
+        IRC.__init__(self, server, nick, port, channels, conf, name)
 
     def create_connection(self):
-        return crlf_ssl_tcp(self.server, self.port, self.ignore_cert_errors)
+        return crlf_ssl_tcp(self.server, self.port, self.ignore_cert_errors, self.name)

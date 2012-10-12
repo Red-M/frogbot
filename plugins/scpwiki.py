@@ -2,7 +2,7 @@
 # SCP Foundation wiki scrapper made by Red_M on esper.net or Red-M on GitHub.com
 # used parts of the google search plugin to get our scp wiki url
 # used parts of the page titler to obtain some info
-from util import hook, http, urlnorm
+from util import hook, http, urlnorm, perm
 import urllib
 import httplib
 import urllib2
@@ -11,6 +11,13 @@ import time
 import urlparse
 import repaste
 import urlhistory
+
+badlet=["a","b","c","d","e","f","g","h","i","j","k",'l','m',
+'n','o','p','q','r','s','t','u','v','w','x','y','z','A','B',
+'C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q',
+'R','S','T','U','V','W','X','Y','Z',"!",'@','\#','$','%','^',
+'&','*','(',')','-','_','=','+',',','<','>','.','/','?','\\',
+'|','`','~','[',']','{','}',' ']
 
 ignored_urls = ["http://youtube.com"]
 wordDic = {
@@ -102,17 +109,17 @@ def dbresponse(url,db_global):
     for dart in wordDic:
         itemname = itemname.replace(dart,wordDic[dart])
     for dart in wordDic:
-        itemid = itemid.replace(dart,wordDic[dart]).replace("SCP-","").replace("scp-","")
+        itemid = itemid.replace(dart,wordDic[dart])
     for dart in wordDic:
         classtype = classtype.replace(dart,wordDic[dart])
     return("Item Name:\x02\x1f"+itemname+"\x02\x1f Item #:\x02\x1f"+itemid+"\x1f\x02 Class:'\x02\x1f"+classtype+"\x1f\x02'. "+desc)
         
-def goturlforscp(url,scpid,db_global,timemon):
+def goturlforscp(url,scpid,db_global,timemon,inten):
     scpid = url.replace("http://www.scp-wiki.net/scp-","") #gets scpid as string
-    if scpid.endswith("-j"):
-        iscpid = int(scpid.replace("-j",""))
-    if not scpid.endswith("-j"):
-        iscpid = int(scpid) #lets see if we can get it as a int for range testing
+    for data in badlet:
+        if data in scpid:
+            return("Didnt get a SCP page! Instead got: "+scpid)
+    iscpid = int(scpid) #lets see if we can get it as a int for range testing
     if type(iscpid)==type(1):
         if not scpid.endswith("-j") and iscpid in range(1,1000): #item name url to get our SCP's item name from
             urltitle = "http://www.scp-wiki.net/scp-series"
@@ -122,43 +129,50 @@ def goturlforscp(url,scpid,db_global,timemon):
     title = parse(url,titler)#.replace("</p>","").replace("<p>","") #^- regex to get the data we want. <- passes the url and regex to the parser
     if type(title)==type(("","")): #check to see if we get an error from our parser
         (itemid,classtype,desc) = title
+    desc = http.unescape(desc).replace("  "," ")
+    classtype = http.unescape(classtype).replace(" ","")
+    itemid = http.unescape(itemid).replace(" ","")
     if not type(title)==type(("","")):
         (itemid,classtype,desc) = ("","","") #if we get an error then set our other values to nothing
     if not scpid.endswith("-j"): #checking if we have a joke SCP
-        itemname = parse2(urltitle,re.compile('<li><a href="/scp-'+str(iscpid)+'">SCP-'+str(iscpid)+'</a> - (.+?)</li>')) #if we dont then lets get the item name
+        itemname = http.unescape(parse2(urltitle,re.compile('<li><a href="/scp-'+str(scpid)+'">SCP-'+str(scpid)+'</a> - (.+?)</li>'))) #if we dont then lets get the item name
     if scpid.endswith("-j"):
         itemname = "" #if we do then lets not show an item name as we cant get one
-    db_global.execute("insert or replace into scpwiki(itemname, itemid, classtype, desc, url, time) values (?, ?, ?, ?, ?, ?)",(itemname,itemid,classtype,desc,url,timemon))
+    db_global.execute("insert or replace into scpwiki(itemname, itemid, classtype, desc, url, time) values (?, ?, ?, ?, ?, ?)",(http.unescape(itemname),http.unescape(itemid),http.unescape(classtype),http.unescape(desc),url,timemon))
     db_global.commit()
-    return("Item Name:\x02\x1f"+itemname+"\x02\x1f Item #:\x02\x1f"+itemid+"\x1f\x02 Class:'\x02\x1f"+classtype+"\x1f\x02'. "+desc)
+    return(("Item Name:\x02\x1f"+itemname+"\x02\x1f Item #:\x02\x1f"+itemid+"\x1f\x02 Class:'\x02\x1f"+classtype+"\x1f\x02'. "+desc).replace("  "," "))
         
 @hook.command
 def scp(inp, db_global=None,input=None):
     ",scp <query>/<item id> -- Returns SCP Foundation wiki search result for <query>/<item id>."
     db_global.execute("create table if not exists scpwiki(itemname, itemid, classtype, desc, url, time)")
     db_global.commit()
+    if ((inp=="clear cache") and (perm.isowner(input))):
+        db_global.execute("DELETE FROM main.`scpwiki`")
+        db_global.commit()
+        return("cache cleared.")
     timemon = time.strftime("%m", time.gmtime())
-    if len(inp)>3:
+    inten=1
+    for data in badlet:
+        if data in input.inp:
+            inten=0
+    if inten==0:
         url = page(inp,input.host)
-        inten = 0 #string testing
-    if len(inp)==3:
-        url = page(inp,input.host)
-        inten = 1 #int testing for an scp item id
-    if len(inp)==2:
-        url = page("0"+inp,input.host)
-        inten = 1
-    if len(inp)==1:
-        url = page("00"+inp,input.host)
-        inten = 1
-    if not inten==1:
-        url = page(inp,input.host)
+    if inten==1:
+        if len(inp)==3:
+            url = page(inp,input.host)
+        if len(inp)==2:
+            url = page("0"+inp,input.host)
+        if len(inp)==1:
+            url = page("00"+inp,input.host)
     dburl = db_global.execute("select url from scpwiki where url=(?)",(url,)).fetchone()
     if not dburl==None:
         return dbresponse(url,db_global)
     else:
         scpid = url.replace("http://www.scp-wiki.net/scp-","")
+        print(scpid)
         url = "http://www.scp-wiki.net/scp-"+scpid
-        return goturlforscp(url,scpid,db_global,timemon)
+        return goturlforscp(url,scpid,db_global,timemon,inten)
 
 def parse2(match,titler2): #parser for the item name. this will be skipped if we have a joke SCP
     url = urlnorm.normalize(match.encode('utf-8'))
