@@ -1,7 +1,6 @@
 import re
 
 from util import hook, http, perm
-import usertracking
 import sys
 
 import time

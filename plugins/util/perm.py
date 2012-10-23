@@ -6,9 +6,9 @@ def isadmin(input):
 	inuserhost=input.user+'@'+input.host
 	if (input.nick in input.conn.conf["admins"] \
     or inuserhost in input.conn.conf["admins"] \
-    or str(input.nick) in input.bot.auth[str(input.conn.server)]["admin"] \
-    or str(input.nick) in input.bot.auth[str(input.conn.server)]["superadmin"] \
-    or str(input.nick) in input.bot.auth[str(input.conn.server)]["owner"]):
+    or str(input.nick) in input.bot.auth[str(input.conn.name)]["admin"] \
+    or str(input.nick) in input.bot.auth[str(input.conn.name)]["superadmin"] \
+    or str(input.nick) in input.bot.auth[str(input.conn.name)]["owner"]):
 		return True
 	else:
 		return False
@@ -16,8 +16,8 @@ def issuperadmin(input):
 	inuserhost = input.user+'@'+input.host
 	if input.nick in input.conn.conf["superadmins"] \
     or inuserhost in input.conn.conf["superadmins"] \
-    or str(input.nick) in input.bot.auth[str(input.conn.server)]["superadmin"] \
-    or str(input.nick) in input.bot.auth[str(input.conn.server)]["owner"]:
+    or str(input.nick) in input.bot.auth[str(input.conn.name)]["superadmin"] \
+    or str(input.nick) in input.bot.auth[str(input.conn.name)]["owner"]:
 		return True
 	else:
 		return False
@@ -25,7 +25,7 @@ def isowner(input):
 	inuserhost = input.user+'@'+input.host
 	if (input.nick in input.conn.conf["owner"] \
     or inuserhost in input.conn.conf["owner"] \
-    or str(input.nick) in input.bot.auth[str(input.conn.server)]["owner"]):
+    or str(input.nick) in input.bot.auth[str(input.conn.name)]["owner"]):
 		return True
 	else:
 		return False
