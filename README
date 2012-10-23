@@ -1,4 +1,4 @@
-https://secure.travis-ci.org/Red-M/frogbot.png
+[![Build Status](https://secure.travis-ci.org/Red-M/frogbot.png)](http://travis-ci.org/Red-M/frogbot)
 This is frog. frog is an irc bot written in python.
 Based off work from lahwran's crow frog has some nice little extras that i added in to make life easy.
 Some of frog's plugins like his ftp backup one will require some editing to get them to work
