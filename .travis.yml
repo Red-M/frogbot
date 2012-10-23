@@ -3,6 +3,6 @@ python:
   - "2.6"
   - "2.7"
 # command to install dependencies
-install: "pip install cherrypy lxml BeautifulSoup"
+install: "pip install cherrypy lxml mako BeautifulSoup"
 # command to run tests
 script: python ./bot.py
