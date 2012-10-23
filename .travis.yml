@@ -3,6 +3,6 @@ python:
   - "2.6"
   - "2.7"
 # command to install dependencies
-install: "pip install cherrypy3 lxml --use-mirrors"
+install: "apt-get install cherrypy3 lxml"
 # command to run tests
 script: nosetests
