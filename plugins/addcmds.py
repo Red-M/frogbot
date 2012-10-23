@@ -26,10 +26,10 @@ def kl(inp, say=None, nick=None, input=None, bot=None):
         time.sleep(0.1)
         if os.name == 'posix':
             client("127.0.0.1", 4329, "bot term. shutdown. NOW")
-            sys.exit(0)
+            os.system("kill "+os.getpid())
         elif os.name == 'nt':
             client("127.0.0.1", 4329, "bot term. shutdown. NOW")
-            sys.exit(0)
+            os.system("taskkill "+os.getpid())
 
 @hook.command
 def rl(inp, say=None, input=None, bot=None):
