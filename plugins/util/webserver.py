@@ -121,6 +121,12 @@ class StatusPage:
         bit=input['bit'], uptime=input['uptime'], mem=input['mem'], \
         players=input['players'])
         
+        
+class SCPPage:
+    @cherrypy.expose
+    def index(self):
+        return serve_template("scp.mako", title="SCP ideas")
+        
 
 class WebInterface:
     """ main web interface class """
@@ -129,6 +135,7 @@ class WebInterface:
     factoids = FactoidsPage()
     about = AboutPage()
     status = StatusPage()
+    scp = SCPPage()
     @cherrypy.expose
     def index(self):
         input = client("127.0.0.1",4329,"requesting bot variable data " \

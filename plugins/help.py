@@ -24,20 +24,33 @@ def help(inp, bot=None, pm=None):
     commands = dict((value, key) for key, value in funcs.iteritems() if key not in ["8ballnooxt"])
     if not inp:
         length = 0
-        out = ["", ""]
+        out = ["", "", "", ""]
         well = []
         for x in commands:
             well.append(x)
         well.sort()
+        out[0] += "available commands:"
         for x in well:
-            if len(out[0]) + len(str(x)) > 405:
-                out[1] += " " + str(x)
-            else:
+            if len(out[0]) + len(str(x)) < 300:
                 out[0] += " " + str(x)
+            else:
+                if len(out[0]) + len(str(x)) < 300:
+                    out[1] += " " + str(x)
+                else:
+                    if len(out[1]) + len(str(x)) < 300:
+                        out[2] += " " + str(x)
+                    else:
+                        if len(out[2]) + len(str(x)) < 300:
+                            out[3] += " " + str(x)
 
-        pm("available commands: " + out[0][1:])
+        pm(out[0][0:])
         if out[1]:
             pm(out[1][1:])
+        if out[2]:
+            pm(out[2][1:])
+        if out[3]:
+            pm(out[3][1:])
+        pm("This bot also has auto link titling with shortening with the auto titling, rate limiting commands and a permissions system.")
     else:
         if inp in commands:
             pm(commands[inp].__doc__)
