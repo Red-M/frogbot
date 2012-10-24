@@ -70,8 +70,8 @@ def cmdcooldown(inp,input=None,bot=None):
     if input.nick in bot.cooldown[str(server)]:
         bot.cooldown[str(server)][input.nick]+=20
     if ((not perm.isadmin(input)) and (not input.nick in bot.cooldown[str(server)]) and (not input.nick=="") and (input.inp[1].startswith(",") or input.inp[1].startswith("?") or input.inp[1].startswith("!")) and (not input.nick==input.conn.conf["nick"])):
-        bot.cooldown[str(server)][input.nick]=15
-        time.sleep(0.5)
+        bot.cooldown[str(server)][input.nick]=7
+        time.sleep(1)
         wait=True
     while wait==True:
         if bot.cooldown[str(server)][input.nick]<1:
