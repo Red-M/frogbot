@@ -88,6 +88,8 @@ if not os.path.exists(bot.persist_dir):
 print 'Running main loop'
 
 while True:
+    if bot.term=True:
+        sys.exit(0)
     reload()  # these functions only do things
     config()  # if changes have occured
 
@@ -98,7 +100,5 @@ while True:
         except Queue.Empty:
             pass
     while all(conn.out.empty() for conn in bot.conns.itervalues()):
-        if bot.term:
-            sys.exit(0)
         time.sleep(.15)
 
