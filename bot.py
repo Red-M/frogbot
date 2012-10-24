@@ -88,7 +88,7 @@ if not os.path.exists(bot.persist_dir):
 print 'Running main loop'
 
 while True:
-    if bot.term=True:
+    if bot.term==True:
         sys.exit(0)
     reload()  # these functions only do things
     config()  # if changes have occured
