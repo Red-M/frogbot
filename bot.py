@@ -64,6 +64,7 @@ except Exception, e:
     print 'ERROR: malformed config file', e
     sys.exit()
 
+bot.term=False
 for xcon in bot.conns:
     bot.cooldown[str(bot.conns[xcon].name)]={}
     bot.auth[str(bot.conns[xcon].name)]={}
@@ -97,5 +98,7 @@ while True:
         except Queue.Empty:
             pass
     while all(conn.out.empty() for conn in bot.conns.itervalues()):
+        if bot.term:
+            sys.exit(0)
         time.sleep(.15)
 
