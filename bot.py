@@ -89,7 +89,7 @@ print 'Running main loop'
 
 while True:
     if bot.term==True:
-        sys.exit(0)
+        os._exit(0)
     reload()  # these functions only do things
     config()  # if changes have occured
 

@@ -25,15 +25,13 @@ def kl(inp, say=None, nick=None, input=None, bot=None):
                         'activated by %s. Reason: %s' % (input.nick, inp))
         time.sleep(0.1)
         if os.name == 'posix':
-            #client("127.0.0.1", 4329, "bot term. shutdown. NOW")
-            #os.system("kill "+str(os.getpid()))
-            bot.term=True
-            os._exit(0)
+            pid = os.getpid()
+            client("127.0.0.1", 4329, "bot term. shutdown. NOW")
+            os.system("kill %s" % (pid))
         elif os.name == 'nt':
-            #client("127.0.0.1", 4329, "bot term. shutdown. NOW")
-            #os.system("taskkill "+str(os.getpid()))
-            bot.term=True
-            os._exit(0)
+            pid = os.getpid()
+            client("127.0.0.1", 4329, "bot term. shutdown. NOW")
+            os.system("taskkill /PID %s" % (pid))
 
 @hook.command
 def rl(inp, say=None, input=None, bot=None):

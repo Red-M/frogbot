@@ -1,6 +1,5 @@
 import cherrypy
 import os
-import sys
 import time
 import json
 import socket
@@ -148,7 +147,7 @@ class WebInterface:
         players=input['players'])
         
 
-def web_init(inp,inputs=None,bot=None):
+def web_init():
     print "Initalising web server..."
     global input
     input = {}

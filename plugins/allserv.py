@@ -102,7 +102,7 @@ def webservers(inp,input=None,bot=None):
             #elif os.name == 'nt':
             #    pathing = "plugins\web\server.py"
             #    os.system(str(bot.path).replace("bot.py","")+pathing)
-            webserver.web_init(inp,bot,input)
+            webserver.web_init()
             i+=1
         time.sleep(.1)
 
