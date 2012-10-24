@@ -38,7 +38,7 @@ r'''{
   "local irc": {
    "actualaddress": "", 
    "admins": [], 
-   "autotile": true, 
+   "autotitle": true, 
    "bots": [], 
    "bouncer-server": false, 
    "channels": [], 

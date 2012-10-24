@@ -147,7 +147,7 @@ class WebInterface:
         players=input['players'])
         
 
-def web_init():
+def web_init(inp, bot=None,inputs=None):
     print "Initalising web server..."
     global input
     input = {}
