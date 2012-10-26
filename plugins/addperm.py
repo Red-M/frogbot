@@ -25,9 +25,11 @@ def permissions(inp, input=None, bot=None):
         " this command.")
     if check[0] in cmdlist:
         if check[0]=="list" and len(check)==2:
-            listlist=["bots","admins","superadmins","owner"]
+            listlist=["bots","voice","admins","superadmins","owner"]
             if check[1]=="bots":
                 return listbots(bot,input)
+            if check[1]=="voiced":
+                return listvoiced(bot,input)
             if check[1]=="admins":
                 return listadmins(bot,input)
             if check[1]=="superadmins":
@@ -40,9 +42,13 @@ def permissions(inp, input=None, bot=None):
             check[1]=check[1].lower()
             if perm.isadmin(input):
                 if check[0]=="add" and check[1]=="bot" and input.conn.conf["bots"].count(check[2])==0:
-                    return addbot(check[2],bot,input)
+                    return addperm(check[2],bot,input,"bot")
                 if check[0]=="remove" and check[1]=="bot" and input.conn.conf["bots"].count(check[2])==1:
-                    return removebot(check[2],bot,input)
+                    return removeperm(check[2],bot,input,"bots")
+                if check[0]=="add" and check[1]=="voice" and input.conn.conf["voiced"].count(check[2])==0:
+                    return addperm(check[2],bot,input,"voice")
+                if check[0]=="remove" and check[1]=="voice" and input.conn.conf["voiced"].count(check[2])==1:
+                    return removeperm(check[2],bot,input,"voiced")
                 else:
                     if check[1]=="bot" and check[0]=="add":
                         return("error. unknown error or already a "+check[1])
@@ -51,35 +57,43 @@ def permissions(inp, input=None, bot=None):
             if perm.issuperadmin(input):
                 if check[0]=="add":
                     if check[1]=="admin" and input.conn.conf["admins"].count(check[2])==0:
-                        return addadmin(check[2], bot, input)
+                        return addperm(check[2],bot,input,"admin")
+                    if check[1]=="voice" and input.conn.conf["voiced"].count(check[2])==0:
+                        return addperm(check[2],bot,input,"voice")
                     if check[1]=="bot" and input.conn.conf["bots"].count(check[2])==0:
-                        return addbot(check[2],bot,input)
-                    elif (check[1]=="bot" or check[1]=="admin"):
+                        return addperm(check[2],bot,input,"bot")
+                    elif (check[1]=="bot" or check[1]=="admin" or check[1]=="voiced"):
                         return("error. unknown error or already a "+check[1])
                 if check[0]=="remove":
                     if check[1]=="admin" and input.conn.conf["admins"].count(check[2])==1:
-                        return removeadmin(check[2],bot,input)
+                        return removeperm(check[2],bot,input,"admins")
+                    if check[1]=="voice" and input.conn.conf["voiced"].count(check[2])==1:
+                        return removeperm(check[2],bot,input,"voiced")
                     if check[1]=="bot" and input.conn.conf["bots"].count(check[2])==1:
-                        return removebot(check[2],bot,input)
+                        return removeperm(check[2],bot,input,"bots")
                     elif (check[1]=="bot" or check[1]=="admin"):
                         return("error. unknown error or not a "+check[1])
             if perm.isowner(input):
                 if check[0]=="add":
                     if check[1]=="admin" and input.conn.conf["admins"].count(check[2])==0:
-                        return addadmin(check[2], bot, input)
+                        return addperm(check[2], bot, input,"admin")
+                    if check[1]=="voice" and input.conn.conf["voiced"].count(check[2])==0:
+                        return addperm(check[2], bot, input,"voice")
                     if check[1]=="superadmin" and input.conn.conf["superadmins"].count(check[2])==0:
-                        return addsuperadmin(check[2], bot, input)
+                        return addperm(check[2], bot, input,"superadmin")
                     if check[1]=="bot" and input.conn.conf["bots"].count(check[2])==0:
-                        return addbot(check[2],bot,input)
+                        return addperm(check[2],bot,input,"bot")
                     elif (check[1]=="bot" or check[1]=="admin" or check[1]=="superadmin"):
                         return("error. unknown error or already a "+check[1])
                 if check[0]=="remove" and perm.isowner(input):
                     if check[1]=="admin" and input.conn.conf["admins"].count(check[2])==1:
-                        return removeadmin(check[2],bot,input)
+                        return removeperm(check[2],bot,input,"admins")
+                    if check[1]=="voice" and input.conn.conf["voiced"].count(check[2])==1:
+                        return removeperm(check[2],bot,input,"voiced")
                     if check[1]=="superadmin" and input.conn.conf["superadmins"].count(check[2])==1:
-                        return removesuperadmin(check[2],bot,input)
+                        return removeperm(check[2],bot,input,"superadmins")
                     if check[1]=="bot" and input.conn.conf["bots"].count(check[2])==1:
-                        return removebot(check[2],bot,input)
+                        return removeperm(check[2],bot,input,"bots")
                     elif (check[1]=="bot" or check[1]=="admin" or check[1]=="superadmin"):
                         return ("error. unknown error or not a "+check[1])
             elif not perm.isadmin(input):
@@ -91,32 +105,32 @@ def permissions(inp, input=None, bot=None):
             return errorMsg
     elif not check[0] in cmdlist:
         return errorMsg
-        
-def addadmin(inp, bot, input):
-    input.conn.conf["admins"].append(inp)
+
+def removeperm(inp, bot, type):
+    input.conn.conf[type].remove(inp)
     confofall=bot.config
     for xcon in bot.conns:
         confofall['connections'][xcon]=bot.conns[xcon].conf
     json.dump(confofall, open('config', 'w'), sort_keys=True, indent=1)
     return"Done."
 
-def removeadmin(inp, bot, input):
-    input.conn.conf["admins"].remove(inp)
-    confofall=bot.config
-    for xcon in bot.conns:
-        confofall['connections'][xcon]=bot.conns[xcon].conf
-    json.dump(confofall, open('config', 'w'), sort_keys=True, indent=1)
-    return"Done."
-
-def addbot(inp, bot, input):
+def addperm(inp, bot, input, type):
     regex = re.compile("(.*)!(.*)@(.*)")
     match = regex.search(inp)
+    if type=="bot":
+        type2="bots"
+    if type=="voice":
+        type2="voiced"
+    if type=="admin":
+        type2="admins"
+    if type=="superadmin":
+        type2="superadmins"
     if (inp=='' or inp=="*!*@*") or (not match):
-        return("no hostmask was added to the bot list...ignoring command...")
+        return("no hostmask was added to the "+type+" list...ignoring command...")
     if perm.isadmin(input) and match and (not match.group(1)=="" and not match.group(2)=="" and not match.group(3)==""):
-        if input.conn.conf["bots"].count(inp)==0:
-            input.conn.conf["bots"].append(inp)
-            input.conn.conf["bots"].sort()
+        if input.conn.conf[type2].count(inp)==0:
+            input.conn.conf[type2].append(inp)
+            input.conn.conf[type2].sort()
             confofall=bot.config
             for xcon in bot.conns:
                 confofall['connections'][xcon]=bot.conns[xcon].conf
@@ -124,33 +138,9 @@ def addbot(inp, bot, input):
                                                             indent=1)
                 return("done.")
         else:
-            return("already a bot...")
+            return("already a "+type+"...")
     else:
         return("Nope.avi")
-
-def removebot(inp, bot, input):
-    input.conn.conf["bots"].remove(inp)
-    confofall=bot.config
-    for xcon in bot.conns:
-        confofall['connections'][xcon]=bot.conns[xcon].conf
-    json.dump(confofall, open('config', 'w'), sort_keys=True, indent=1)
-    return"Done."
-
-def addsuperadmin(inp, bot, input):
-    input.conn.conf["superadmins"].append(inp)
-    confofall=bot.config
-    for xcon in bot.conns:
-        confofall['connections'][xcon]=bot.conns[xcon].conf
-    json.dump(confofall, open('config', 'w'), sort_keys=True, indent=1)
-    return"Done."
-
-def removesuperadmin(inp, bot, input):
-    input.conn.conf["superadmins"].remove(inp)
-    confofall=bot.config
-    for xcon in bot.conns:
-        confofall['connections'][xcon]=bot.conns[xcon].conf
-    json.dump(confofall, open('config', 'w'), sort_keys=True, indent=1)
-    return"Done."
 
 def listbots(bot, input):
     outrs=', '.join(input.conn.conf["bots"])
@@ -176,6 +166,10 @@ def listsuperadmins(bot, input):
 def listowner(bot, input):
     outos=munge.muninput(input, bot, input.conn.conf["owner"])
     return("The Owner of this bot is: \x02%s" % (outos))
+
+def listvoiced(bot, input):
+    outos=munge.muninput(input, bot, input.conn.conf["voiced"])
+    return("The voiced users of this bot are: \x02%s" % (outos))
 
 @hook.command("stfu")
 @hook.command

@@ -40,7 +40,7 @@ def sieve_suite(bot, input, func, kind, args):
                 return None
     #print input.trigger
     if (perm.isignored(input) or perm.isbot(input)):
-        if ((not perm.isadmin(input)) and (kind=="event") and ("NICK" in args["events"])) or (input.paraml[0].startswith("\x01ACTION ")) or (input.chan in input.conn.conf["ignore"]):
+        if ((not perm.isvoiced(input)) and (kind=="event") and ("NICK" in args["events"])) or (input.paraml[0].startswith("\x01ACTION ")) or (input.chan in input.conn.conf["ignore"]):
             return None
         else:
             return input

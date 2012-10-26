@@ -37,7 +37,7 @@ r'''{
  "connections": {
   "local irc": {
    "actualaddress": "", 
-   "admins": [], 
+   "admins": [Red_M], 
    "autotitle": true, 
    "bots": [], 
    "bouncer-server": false, 
@@ -60,6 +60,7 @@ r'''{
    "ssl": false, 
    "superadmins": ["Red_M"], 
    "twitterfeedchans": {}, 
+   "voiced": ["Red_M"],
    "user": "frog"
   }
  }, 

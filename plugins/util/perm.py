@@ -2,46 +2,49 @@
 # or Red_M on esper.net
 import re
 
-def isadmin(input):
-	inuserhost=input.user+'@'+input.host
-	if (input.nick in input.conn.conf["admins"] \
-    or inuserhost in input.conn.conf["admins"] \
-    or str(input.nick) in input.bot.auth[str(input.conn.name)]["admin"] \
-    or str(input.nick) in input.bot.auth[str(input.conn.name)]["superadmin"] \
-    or str(input.nick) in input.bot.auth[str(input.conn.name)]["owner"]):
-		return True
-	else:
-		return False
-def issuperadmin(input):
-	inuserhost = input.user+'@'+input.host
-	if input.nick in input.conn.conf["superadmins"] \
-    or inuserhost in input.conn.conf["superadmins"] \
-    or str(input.nick) in input.bot.auth[str(input.conn.name)]["superadmin"] \
-    or str(input.nick) in input.bot.auth[str(input.conn.name)]["owner"]:
-		return True
-	else:
-		return False
-def isowner(input):
-	inuserhost = input.user+'@'+input.host
-	if (input.nick in input.conn.conf["owner"] \
-    or inuserhost in input.conn.conf["owner"] \
-    or str(input.nick) in input.bot.auth[str(input.conn.name)]["owner"]):
-		return True
-	else:
-		return False
-def isbot(input):
+def permcheck(input,type,type2):
     inuserhost = input.nick+'!'+input.user+'@'+input.host
     list=[]
     i=0
-    for data in input.conn.conf["bots"]:
+    for data in input.conn.conf[type]:
         regex = re.compile(data.replace("*",".*"))
         match = regex.search(inuserhost)
         i=i+1
-        if (match and input.nick not in input.conn.conf["admins"]):
+        if (match and input.nick not in input.conn.conf[type2]) or str(input.nick) in input.bot.auth[str(input.conn.name)][type]):
             return True
         else:
-            if not match and len(input.conn.conf["bots"])==i:
+            if not match and len(input.conn.conf[type])==i:
                 return False
+
+def isadmin(input):
+    if permcheck(input,"admins","ignore") or permcheck(input,"superadmins","ignore") or isowner(input):
+        return True
+    else:
+        return False
+
+def issuperadmin(input):
+    if permcheck(input,"superadmins","ignore") or isowner(input):
+        return True
+    else:
+        return False
+
+def isowner(input):
+    inuserhost = input.user+'@'+input.host
+    if (input.nick in input.conn.conf["owner"] \
+    or inuserhost in input.conn.conf["owner"] \
+    or str(input.nick) in input.bot.auth[str(input.conn.name)]["owner"]):
+        return True
+    else:
+        return False
+
+def isbot(input):
+    return permcheck(input,"bots","admins")
+    
+def isvoiced(input):
+    if permcheck(input,"voiced","ignore") or permcheck(input,"admins","ignore") or permcheck(input,"superadmins","ignore") or isowner(input):
+        return True
+    else:
+        return False
                 
 def isignored(input):
     inuserhost = input.nick+'!'+input.user+'@'+input.host

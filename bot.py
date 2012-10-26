@@ -71,6 +71,7 @@ for xcon in bot.conns:
     bot.auth[str(bot.conns[xcon].name)]["owner"]={}
     bot.auth[str(bot.conns[xcon].name)]["superadmin"]={}
     bot.auth[str(bot.conns[xcon].name)]["admin"]={}
+    bot.auth[str(bot.conns[xcon].name)]["voiced"]={}
     bot.auth[str(bot.conns[xcon].name)]["none"]={}
     bot.seen[str(bot.conns[xcon].name)]={}
     bot.connected[str(bot.conns[xcon].name)]=0

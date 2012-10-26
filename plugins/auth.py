@@ -51,7 +51,7 @@ def authenticate(inp, input=None, db_global=None, bot=None, conn=None):
             else:
                 return("incorrect password or username. please try again.")
         if perm.isowner(input) and check[0]=='groupset':
-            if check[2] in ["admin","superadmin","owner"] and usercheck==check[1] and check[2] in ["admin","superadmin","owner"]:
+            if check[2] in ["voiced","admin","superadmin","owner"] and usercheck==check[1] and check[2] in ["admin","superadmin","owner"]:
                 db_global.execute("delete from auth where user=(?)", (check[1],)).rowcount
                 db_global.execute("insert or replace into auth(user, pass, groups) values (?,?,?)",(check[1], passcheck,check[2]))
                 db_global.commit()
@@ -81,7 +81,7 @@ def authenticate(inp, input=None, db_global=None, bot=None, conn=None):
         
 auth_userlock = thread.allocate_lock()
 flag_re = re.compile(r"^([@~&%+]*)(.*)$")
-groupscheck=["admin","superadmin","owner"]
+groupscheck=["voiced","admin","superadmin","owner"]
 
 def userigntrack(old,new,input,bot):
     if input.conn.conf["ignore"].count(old)==1:
