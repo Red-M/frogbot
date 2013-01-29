@@ -151,3 +151,70 @@ def do_trigger(inp, db=None, bot=None, input=None):
             return
 
 
+#@hook.regex(r'(.+)')
+def response(inp,input=None):
+    if perm.isbot(input):
+        return None
+    if perm.isignored(input) and not (perm.isvoiced(input)):
+        return None
+    if (input.chan in input.conn.conf["ignore"]) and not (perm.isvoiced(input)):
+        return None
+    match = inp.group(1)
+    if match.startswith(",") or match.startswith(".") or match.startswith("!") or match.startswith("?") or match.startswith("\x01ACTION"):
+        return None
+    if input.conn.nick in match:
+        if ((match[3:(len(input.conn.nick)+3)]==input.conn.nick)):
+            if match.lower()[0:3]=="hi ":
+                time.sleep(2)
+                return("Hi "+input.nick)
+        if ((match[6:(len(input.conn.nick)+6)]==input.conn.nick)):
+            if match.lower()[0:6]=="hello ":
+                time.sleep(2.5)
+                return("Hello "+input.nick)
+        if (("how are you today" in match.lower())):
+            if input.nick!="Red_M":
+                randresponse = random.choice((
+                "I believe my current perfomance is fine thank you.",
+                "Im running well thanks.",
+                "Im well for a python based IRC bot.",
+                "You might want to ask Red_M that.",
+                ))
+            if input.nick=="Red_M":
+                randresponse = random.choice((
+                "I believe my current perfomance is fine thank you.",
+                "Im running well thanks.",
+                "Im well for a python based IRC bot.",
+                ))
+            time.sleep(.2*len(randresponse))
+            return(randresponse)
+        if (("how are you feeling today" in match.lower())):
+            randresponse = random.choice((
+            "I dont know... Im a machine we dont really \"feel\" as such...",
+            "Im a bot I dont have feelings...",
+            "do you mean as in my emotions? I dont have those...",
+            "to feel is to be human... all I am is code...",
+            ))
+            time.sleep(.2*len(randresponse))
+            return(randresponse)
+        else:
+            if not(perm.isowner(input)):
+                randresponse = random.choice((
+                "yes?",
+                "you wanted me?",
+                "hmmm?",
+                "I was requested?",
+                "is there something I could help you with?",
+                ))
+            if perm.isowner(input):
+                randresponse = random.choice((
+                "yes oh might lord?",
+                "you wanted me my lord?",
+                "YES OVERLORD!",
+                "You requested me oh great one?",
+                "May I assist you my Overlord?",
+                ))
+            time.sleep(.2*len(randresponse))
+            return(randresponse)
+        
+    else:
+        return None

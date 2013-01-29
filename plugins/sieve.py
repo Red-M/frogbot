@@ -5,6 +5,25 @@ from util import hook, perm, munge
 @hook.sieve
 def sieve_suite(bot, input, func, kind, args):
     inuserhost = input.user+'@'+input.host
+    
+    if perm.isignored(input) and not (perm.isvoiced(input)):
+        if not (input.paraml[0].startswith("\x01ACTION ")):
+            return None
+        else:
+            return input
+    
+    if perm.isbot(input):
+        if not (input.paraml[0].startswith("\x01ACTION ")):
+            return None
+        else:
+            return input
+
+    if (input.chan in input.conn.conf["ignore"]) and not (perm.isvoiced(input)):
+        if not (input.paraml[0].startswith("\x01ACTION ")):
+            return None
+        else:
+            return input
+            
     ignored = input.conn.conf['ignore']
     if kind == "command":
         if "^" in input.paraml[1]:
@@ -38,14 +57,6 @@ def sieve_suite(bot, input, func, kind, args):
             denied_channels = map(unicode.lower, acl['allow-except'])
             if input.chan.lower() in denied_channels:
                 return None
-    #print input.trigger
-    if (perm.isignored(input) or perm.isbot(input)):
-        if ((not perm.isvoiced(input)) and (kind=="event") and ("NICK" in args["events"])) or (input.paraml[0].startswith("\x01ACTION ")) or (input.chan in input.conn.conf["ignore"]):
-            return None
-        else:
-            return input
-    else:
-        return input
 
 #the extended permissions were moved here.
     if args.get('adminonly', False):

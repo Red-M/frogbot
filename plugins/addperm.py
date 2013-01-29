@@ -4,8 +4,8 @@ import json, re
 
 errorMsg = ("error. unknown error or not a valid use for this command. "
         "proper use: ,perm <add/remove|list> "
-        "<bot/admin/superadmin|bots/admins/superadmins> "
-        "[nick or host to add/remove from the admin/superadmin/bot list] "
+        "<bot/voice/admin/superadmin|bots/voiced/admins/superadmins> "
+        "[nick or host to add/remove from the voice/admin/superadmin/bot list] "
         "where things in <> are required and [] are optional depending on "
         "wether or not you are adding/removing or listing a group and "
         "where / is one of these and | is one or the other.")
@@ -106,7 +106,7 @@ def permissions(inp, input=None, bot=None):
     elif not check[0] in cmdlist:
         return errorMsg
 
-def removeperm(inp, bot, type):
+def removeperm(inp, bot, input, type):
     input.conn.conf[type].remove(inp)
     confofall=bot.config
     for xcon in bot.conns:
@@ -152,14 +152,22 @@ def listbots(bot, input):
 def listadmins(bot, input):
     outos=[]
     for nicks in input.conn.conf["admins"]:
-        outos.append(munge.muninput(input, bot, nicks))
+        if nicks=="":
+            empty = removeperm(nicks, bot, "voice")
+            print("found empty entries in admins. removed them.")
+        if not nicks=="":
+            outos.append(munge.muninput(input, bot, nicks))
     outoss=', '.join(outos)
     return("The Admins of this bot are: \x02%s" % (outoss))
 
 def listsuperadmins(bot, input):
     outos=[]
     for nicks in input.conn.conf["superadmins"]:
-        outos.append(munge.muninput(input, bot, nicks))
+        if nicks=="":
+            empty = removeperm(nicks, bot, "superadmin")
+            print("found empty entries in superadmins. removed them.")
+        if not nicks=="":
+            outos.append(munge.muninput(input, bot, nicks))
     outoss=', '.join(outos)
     return("The Super Admins of this bot are: \x02%s" % (outoss))
 
@@ -168,8 +176,15 @@ def listowner(bot, input):
     return("The Owner of this bot is: \x02%s" % (outos))
 
 def listvoiced(bot, input):
-    outos=munge.muninput(input, bot, input.conn.conf["voiced"])
-    return("The voiced users of this bot are: \x02%s" % (outos))
+    outos=[]
+    for nicks in input.conn.conf["voiced"]:
+        if nicks=="":
+            empty = removeperm(nicks, bot, "voice")
+            print("found empty entries in voiced. removed them.")
+        if not nicks=="":
+            outos.append(munge.muninput(input, bot, nicks))
+    outoss=', '.join(outos)
+    return("The voiced users of this bot are: \x02%s" % (outoss))
 
 @hook.command("stfu")
 @hook.command

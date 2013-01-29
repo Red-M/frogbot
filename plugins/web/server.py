@@ -119,11 +119,6 @@ class StatusPage:
         players=input['players'])
         
         
-class SCPPage:
-    @cherrypy.expose
-    def index(self):
-        return serve_template("scp.mako", title="SCP ideas")
-        
 
 class WebInterface:
     """ main web interface class """

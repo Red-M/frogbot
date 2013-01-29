@@ -17,7 +17,7 @@ def wolframalpha(inp, bot=None, input=None):
     url = 'http://api.wolframalpha.com/v2/query?format=plaintext'
 
     result = http.get_xml(url, input=inp, appid=api_key)
-
+    input.say("Please wait.")
     pod_texts = []
     for pod in result.xpath("//pod"):
         title = pod.attrib['title']

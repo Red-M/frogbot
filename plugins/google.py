@@ -5,11 +5,11 @@ from util import http
 @hook.command('image')
 @hook.command('gis')
 @hook.command
-def googleimage(inp):
+def googleimage(inp,input=None):
     ".gis <term> -- Returns first Google Image result (Safesearch off)."
     if '^' in inp:
         inp = str(inp).replace("^", bot.chanseen[input.conn.server][input.chan][0])
-    url = 'http://ajax.googleapis.com/ajax/services/search/images?q='+str(inp).replace(" ","%20")+'&v=1.0&safe=off'
+    url = 'http://ajax.googleapis.com/ajax/services/search/images?q='+str(inp).replace(" ","%20")+'&v=1.0&safe=off&userip='+input.host
     parsed = http.get_json(url)
     if not 200 <= parsed['responseStatus'] < 300:
         raise IOError('error searching for images: %d: %s' % ( \
@@ -23,9 +23,9 @@ def googleimage(inp):
 @hook.command('search')
 @hook.command('g')
 @hook.command
-def google(inp):
+def google(inp,input=None):
     ".google <query> -- Returns first google search result for <query>."
-    url = 'http://ajax.googleapis.com/ajax/services/search/web?q='+str(inp).replace(" ","%20")+'&v=1.0&safe=off&client=google-csbe'
+    url = 'http://ajax.googleapis.com/ajax/services/search/web?q='+str(inp).replace(" ","%20")+'&v=1.0&safe=off&client=google-csbe&userip='+input.host
     parsed = http.get_json(url)
     #print(url)
     if not parsed['responseStatus']==200:

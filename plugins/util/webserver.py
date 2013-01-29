@@ -1,5 +1,6 @@
 import cherrypy
 import os
+import sys
 import time
 import json
 import socket
@@ -122,11 +123,6 @@ class StatusPage:
         players=input['players'])
         
         
-class SCPPage:
-    @cherrypy.expose
-    def index(self):
-        return serve_template("scp.mako", title="SCP ideas")
-        
 
 class WebInterface:
     """ main web interface class """
@@ -147,7 +143,7 @@ class WebInterface:
         players=input['players'])
         
 
-def web_init(inp, bot=None,inputs=None):
+def web_init(inp,inputs=None,bot=None):
     print "Initalising web server..."
     global input
     input = {}

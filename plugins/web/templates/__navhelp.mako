@@ -17,7 +17,7 @@ padding-top: 19px;
 				<ul class="nav pull-right">
 						<li><a href="/status">Status:</a></li>
 						<li class="divider-vertical"></li>
-						<li class="status"><span class="label label-success">Online</span></li>	</ul>
+						<li class="status"><span class="label label-success">Online</span><img src="https://secure.travis-ci.org/Red-M/frogbot.png"></li>	</ul>
 			</div>
 				<!--/.nav-collapse --> 
 			</div>

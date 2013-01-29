@@ -6,11 +6,32 @@ def permcheck(input,type,type2):
     inuserhost = input.nick+'!'+input.user+'@'+input.host
     list=[]
     i=0
+    if type=="admins":
+        type3="admin"
+    if type=="superadmins":
+        type3="superadmin"
+    if not (type=="admins" or type=="superadmins"):
+        type3=type
     for data in input.conn.conf[type]:
-        regex = re.compile(data.replace("*",".*"))
+        data = data.replace("*",".*").replace("[","\\[").replace("]","\\]")
+        regex = re.compile(data)
         match = regex.search(inuserhost)
         i=i+1
-        if (match and input.nick not in input.conn.conf[type2]) or str(input.nick) in input.bot.auth[str(input.conn.name)][type]):
+        if (((match) and (input.nick not in input.conn.conf[type2])) or (str(input.nick) in input.bot.auth[str(input.conn.name)][type3])):
+            return True
+        else:
+            if not match and len(input.conn.conf[type])==i:
+                return False
+              
+def permcheck2(input,type,type2):
+    inuserhost = input.nick+'!'+input.user+'@'+input.host
+    list=[]
+    i=0
+    for data in input.conn.conf[type]:
+        regex = re.compile(data.replace("*",".+?"))
+        match = regex.search(inuserhost)
+        i=i+1
+        if ((match) and (input.nick not in input.conn.conf[type2])):
             return True
         else:
             if not match and len(input.conn.conf[type])==i:
@@ -47,25 +68,7 @@ def isvoiced(input):
         return False
                 
 def isignored(input):
-    inuserhost = input.nick+'!'+input.user+'@'+input.host
-    list=[]
-    i=0
-    for data in input.conn.conf["ignore"]:
-        if (input.chan in input.conn.conf["ignore"]) and (input.nick not in input.conn.conf["admins"]):
-            return True
-        else:
-            if input.nick not in input.conn.conf["admins"]:
-                regex = re.compile(data.replace("*",".*"))
-                match = regex.search(inuserhost)
-                i=i+1
-                if (match and input.nick not in input.conn.conf["admins"]) \
-                or (input.chan in input.conn.conf["ignore"]):
-                    return True
-                else:
-                    if not match and len(input.conn.conf["ignore"])==i:
-                        return False
-            else:
-                return False
+    return permcheck2(input,"ignore","admins")
         
 def amsg(input,msg):
     for xcon in input.bot.conns:
