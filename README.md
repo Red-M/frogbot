@@ -8,7 +8,7 @@
 <br></br>
 <br>frog requires atleast Python 2.6 or above to run.</br>
 <br>It is Highly recommended to run python 2.7.3 as this is the version of python that is tested with.</br>
-<br>Frog also requires these modules/libraries for the version of pyhton you have:</br>
+<br>Frog also requires these modules/libraries for the version of python you have:</br>
 <br>- sqlite3  (included in the installation of python.(bastically you have python installed with no errors and you should have this!))</br>
 <br>- lxml  (http://pypi.python.org/pypi/lxml)</br>
 <br></br>
