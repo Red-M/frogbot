@@ -4,8 +4,8 @@ a = 34123
 
 __creator__ = "Red_M"
 __credits__ = ["neersighted","Luke","Lahwran"]
-__email__ = "pooatyou.com@gmail.com"
-__web__ = "http://red-m.x10.mx"
+__email__ = "redm@red-m.net"
+__web__ = "http://red-m.net"
 __repo__ = "https://github.com/Red-M/frogbot"
 
 import os
