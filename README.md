@@ -1,3 +1,8 @@
+THIS PROJECT HAS MOVED TO BITBUCKET
+===================================
+https://bitbucket.org/Red_M/redserv/
+====================================
+
 <a href="https://secure.travis-ci.org/Red-M/frogbot.png"><img src="https://secure.travis-ci.org/Red-M/frogbot.png" alt="Build Status" /></a>
 <br>This is frog.</br>
 <br>frog is an irc bot written in python.</br>
