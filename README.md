@@ -1,6 +1,6 @@
 THIS PROJECT HAS MOVED TO BITBUCKET
 ===================================
-https://bitbucket.org/Red_M/redserv/
+https://bitbucket.org/Red_M/frogbot/
 ====================================
 
 <a href="https://secure.travis-ci.org/Red-M/frogbot.png"><img src="https://secure.travis-ci.org/Red-M/frogbot.png" alt="Build Status" /></a>
